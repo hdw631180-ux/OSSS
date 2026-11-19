@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>archweb — Arch Linux dans le navigateur</title>
+<meta name="theme-color" content="#14052b"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2l12 7v14l-12 7-12-7V9z' fill='%2314052b' stroke='%23ff3d9a' stroke-width='2.5'/%3E%3Cpath d='M21.5 9H11.5V23H21.5M11.5 16H19.5' fill='none' stroke='%23ff3d9a' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#000000;--fg:#e9e3f2;--ac:#ff3d9a;--dim:#8f7aa8;--bd:#3a1d5c;--red:#ff5c8a;--grn:#35e0d0;--ylw:#ffb347;--tkh:50px}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);-webkit-font-smoothing:antialiased;color:var(--fg);font:13px/1.4 ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;overflow:hidden}
+#boot{position:fixed;inset:0;z-index:9;background:#000;color:#bbb;padding:16px;white-space:pre-wrap;overflow:hidden}
+#boot .ok{color:var(--grn)}
+#desk{display:flex;flex-direction:column;height:100%}
+#bar{display:flex;align-items:center;gap:6px;height:28px;padding:0 8px;background:#000000;border-bottom:1px solid var(--bd);flex:none;white-space:nowrap}
+#bar .w{padding:2px 9px;border-radius:3px;color:var(--dim);cursor:pointer}
+#bar .w.has{color:var(--fg)}
+#bar .w.on{background:var(--ac);color:#04121b;font-weight:700}
+#bar .t{flex:1;text-align:center;color:var(--dim);overflow:hidden;text-overflow:ellipsis}
+#bar .b{border:1px solid var(--bd);background:none;color:var(--fg);font:inherit;padding:1px 8px;border-radius:3px;cursor:pointer}
+#bar .b:hover{border-color:var(--ac);color:var(--ac)}
+#bar .logo{display:flex;align-items:center;gap:6px;color:var(--ac);font-weight:700;padding-right:4px}
+#area{position:relative;flex:1;margin:6px;min-height:0}
+.win{position:absolute;display:none;flex-direction:column;background:#000000;border:2px solid var(--bd);border-radius:4px;overflow:hidden}
+.win.f{border-color:var(--ac)}
+.tb{display:flex;justify-content:space-between;padding:2px 8px;font-size:11px;background:#000000;color:var(--dim);flex:none}
+.tb .x{cursor:pointer;font-size:14px;line-height:1}
+.tb .x:hover{color:var(--red)}
+.bd{flex:1;overflow:auto;padding:8px;white-space:pre-wrap;word-break:break-word}
+.ln{display:flex}
+.ln input{flex:1;min-width:0;background:none;border:0;outline:0;color:inherit;font:inherit;caret-color:var(--ac)}
+.a{color:var(--ac)}.g{color:var(--grn)}.r{color:var(--red)}.y{color:var(--ylw)}.d{color:var(--dim)}
+.wiki h2{margin:0 0 6px;color:var(--ac);font-size:16px}
+.wiki h3{margin:14px 0 4px;color:var(--ylw);font-size:13px}
+.wiki{white-space:normal;max-width:72ch}
+.wiki kbd{border:1px solid var(--bd);background:#000000;border-radius:3px;padding:0 5px;color:var(--grn)}
+.wiki code{color:var(--ac)}
+.wiki p,.wiki li{margin:3px 0}
+.wiki ul{padding-left:18px;margin:4px 0}
+#desk{position:relative}
+#dock,#lc,#bat{display:none}
+.mk{width:18px;height:18px;vertical-align:middle}
+.tb b{cursor:pointer;width:22px;height:22px;border-radius:6px;display:inline-grid;place-items:center;font-size:13px}
+.tb .m,.tb .mx{display:none}
+.toast{position:fixed;top:40px;right:14px;z-index:999999;background:#000000f0;border:1px solid #ffffff22;border-left:3px solid var(--ac);padding:10px 14px;border-radius:8px;color:#e2e8f0;font:13px system-ui;animation:in .25s}
+@keyframes in{from{opacity:0;transform:translateX(20px)}}
+.app{white-space:normal!important;padding:0!important;font:13px system-ui;color:#e2e8f0}
+.fm{display:grid;grid-template-columns:140px 1fr 1fr;height:100%}
+.fs{border-right:1px solid #ffffff14;padding:8px}.fl{overflow:auto;padding:8px}
+.fi,.fe{padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.fi:hover,.fe:hover{background:#ffffff10}.fi.on,.fe.on{background:color-mix(in srgb,var(--ac) 30%,transparent)}
+.fv{padding:12px;white-space:pre-wrap;border-left:1px solid #ffffff14;font:12px ui-monospace,monospace;overflow:auto}
+.fp{color:var(--dim);padding:2px 8px 8px}.up{cursor:pointer;color:var(--ac);margin-right:6px}
+.st{padding:16px}.st h2{margin:0 0 4px}
+.st h3{margin:16px 0 8px;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em}
+.sr{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #ffffff10}.sr>div{flex:1}
+.st button{background:var(--ac);color:#04121b;border:0;border-radius:8px;padding:6px 14px;font:inherit;font-weight:600;cursor:pointer}
+.st button.rm{background:#ffffff18;color:#e2e8f0}
+.sw{display:flex;gap:10px;flex-wrap:wrap}
+.sw i{width:56px;height:36px;border-radius:8px;border:2px solid #ffffff30;cursor:pointer}.sw i:hover{border-color:#fff}
+.sw i[data-a]{width:30px;height:30px;border-radius:50%}
+#dock{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);gap:10px;padding:8px 12px;background:#000000b3;backdrop-filter:blur(18px);border:1px solid #ffffff1c;border-radius:20px;z-index:99998;align-items:center;box-shadow:0 10px 40px #000a}
+.dk{position:relative;cursor:pointer;transition:transform .12s ease-out;transform-origin:50% 100%}
+@keyframes bnc{0%,100%{transform:translateY(0)}30%{transform:translateY(-24px)}55%{transform:translateY(0)}72%{transform:translateY(-10px)}}
+.dk.bounce{animation:bnc .8s ease}
+.dk svg{display:block}.dk .mk{width:46px;height:46px;padding:8px;background:#ffffff12;border-radius:12px}
+.dk.run::after{content:"";position:absolute;left:50%;bottom:-6px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ac)}
+.sep{width:1px;height:34px;background:#ffffff22;margin:0 4px}
+#lc{position:absolute;inset:30px 0 0 0;z-index:100000;background:#000000cc;backdrop-filter:blur(22px);flex-direction:column;align-items:center;padding:56px 16px;gap:28px}
+#lc.open{display:flex}
+#lc input{width:min(440px,90%);background:#ffffff14;border:1px solid #ffffff22;border-radius:12px;padding:12px 16px;color:#fff;font:15px system-ui;outline:0}
+#lcg{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;max-width:560px}
+.ap{width:92px;text-align:center;cursor:pointer;font:12px system-ui;color:#e2e8f0}.ap svg{display:block;margin:0 auto 6px;transition:transform .15s}.ap:hover svg{transform:scale(1.1)}
+body.winmode #desk{background:var(--wp)}
+body.winmode #area{margin-bottom:84px}
+body.winmode #bat{display:inline}
+body.winmode #bar{height:30px;background:#000000cc;backdrop-filter:blur(14px);border-bottom:1px solid #ffffff12}
+body.winmode #bar .logo,body.winmode #bar .b[data-sp],body.winmode #pk{display:none}
+body.winmode #bar .w.start{display:flex;align-items:center;gap:7px;padding:2px 10px;background:#ffffff10;color:#fff;border-radius:8px}
+body.winmode .win{background:#000000ee;backdrop-filter:blur(18px);border-radius:12px;border:1px solid #ffffff1f;box-shadow:0 18px 50px #000a;resize:both;min-width:260px;min-height:140px}
+body.winmode .win.f{border-color:var(--ac);box-shadow:0 18px 50px #000c,0 0 0 1px var(--ac)}
+body.winmode .tb{background:transparent;color:#cbd5e1;font:12px system-ui;padding:6px 8px 6px 14px;touch-action:none}
+body.winmode .tb b{color:#94a3b8}body.winmode .tb b:hover{background:#ffffff18;color:#fff}
+body.winmode .tb .x:hover{background:#ef4444;color:#fff}
+body.winmode .tb .m,body.winmode .tb .mx{display:inline-grid}
+@keyframes winIn{from{opacity:0;transform:scale(.88) translateY(14px)}60%{opacity:1;transform:scale(1.02)}to{transform:none}}
+@keyframes winOut{to{opacity:0;transform:scale(.88)}}
+@keyframes winMin{to{transform:translate(var(--tx),var(--ty)) scale(.08,.03);opacity:0;border-radius:60px}}
+@keyframes winRs{from{transform:translate(var(--tx),var(--ty)) scale(.08,.03);opacity:0}}
+@keyframes lcIn{from{opacity:0}}
+@keyframes apIn{from{opacity:0;transform:translateY(16px) scale(.9)}}
+@keyframes drift{to{transform:translate(6%,4%) rotate(8deg)}}
+.ap{animation:apIn .4s cubic-bezier(.2,.9,.3,1.2) both}
+#lc.open{animation:lcIn .28s ease}
+body.winmode .win{transition:box-shadow .25s,border-color .25s}
+body.winmode .win.opening{animation:winIn .42s cubic-bezier(.2,.9,.3,1)}
+body.winmode .win.closing{animation:winOut .22s ease-in forwards;pointer-events:none}
+body.winmode .win.minimizing{animation:winMin .32s cubic-bezier(.5,0,.8,.4) forwards;pointer-events:none}
+body.winmode .win.restoring{animation:winRs .36s cubic-bezier(.2,.9,.3,1)}
+body.winmode .win.tr{transition:left .34s cubic-bezier(.3,.9,.3,1),top .34s cubic-bezier(.3,.9,.3,1),width .34s cubic-bezier(.3,.9,.3,1),height .34s cubic-bezier(.3,.9,.3,1)}
+/* feux tricolores façon macOS */
+body.winmode .tb{gap:10px;padding:11px 14px}
+body.winmode .tb>span:last-child{order:-1;display:flex;gap:8px}
+body.winmode .tb .tt{flex:1;text-align:center;margin-right:52px}
+body.winmode .tb b{width:12px;height:12px;border-radius:50%;font-size:0;color:#0009!important;font-weight:700;line-height:1;transition:filter .15s,box-shadow .15s;box-shadow:inset 0 1px 0 #ffffff60,0 1px 3px #0006}
+body.winmode .tb>span:last-child:hover b{font-size:10px}
+body.winmode .tb b:hover{filter:brightness(1.15)}
+body.winmode .tb b.x{order:1;background:#ff5f57!important}
+body.winmode .tb b.m{order:2;background:#febc2e!important}
+body.winmode .tb b.mx{order:3;background:#28c840!important}
+/* ========== ARCHWEB VOID MESH — signature OS (plus glass générique) ========== */
+body.winmode #desk{overflow:hidden;perspective:none;background:var(--wp)}
+/* Fond mesh + bloom rouge discret */
+body.winmode #desk::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(ellipse 70% 50% at 15% 10%,#ff3d9a22,transparent 55%),
+  radial-gradient(ellipse 50% 40% at 90% 85%,#35e0d02a,transparent 55%),
+  linear-gradient(#ff3d9a14 1px,transparent 1px),
+  linear-gradient(90deg,#ff3d9a14 1px,transparent 1px);
+  background-size:auto,auto,48px 48px,48px 48px;
+  animation:meshPulse 12s ease-in-out infinite alternate}
+@keyframes meshPulse{from{opacity:.85;filter:hue-rotate(0deg)}to{opacity:1;filter:hue-rotate(8deg)}}
+body.winmode #desk::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(ellipse 100% 80% at 50% 50%,transparent 40%,#00000099 100%);
+  box-shadow:inset 0 0 100px #000}
+
+/* Barre — carbone + ligne néon */
+body.winmode #bar{
+  position:relative;z-index:5;
+  background:#14072af2;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid #3a1d5c;
+  box-shadow:0 1px 0 #ff3d9a33,0 8px 32px #0008;
+}
+body.winmode #bar::after{content:"";position:absolute;left:10%;right:10%;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,#ff3d9a88 30%,#ff6b7a 50%,#ff3d9a88 70%,transparent);opacity:.7}
+
+/* Fenêtres — panneau void (mat, bord néon, lisible) */
+body.winmode .win{
+  background:#12061fee;
+  backdrop-filter:blur(24px) saturate(140%);
+  -webkit-backdrop-filter:blur(24px) saturate(140%);
+  border:1px solid #4a2670;
+  border-radius:14px;
+  box-shadow:
+    0 0 0 1px #000,
+    0 12px 40px #000000aa,
+    0 0 24px #ff3d9a12;
+  transform:none;
+  transition:box-shadow .25s,border-color .25s,transform .2s ease;
+  resize:both;min-width:260px;min-height:140px;
+}
+body.winmode .win.f{
+  border-color:color-mix(in srgb,var(--ac) 55%,#5b3390);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb,var(--ac) 40%,transparent),
+    0 16px 48px #000000cc,
+    0 0 32px color-mix(in srgb,var(--ac) 22%,transparent),
+    inset 0 1px 0 #ffffff12;
+  transform:none;
+}
+body.winmode .win::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+  background:linear-gradient(180deg,#ffffff0c 0%,transparent 28%);
+  opacity:1;
+}
+body.winmode .win::after,#dock::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;z-index:2;
+  background:linear-gradient(160deg,#ffffff35 0%,transparent 35%,transparent 65%,#ff3d9a30 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:.7;
+}
+
+/* Dock — barre carbone */
+#dock{
+  background:#14072af5;
+  backdrop-filter:blur(28px);
+  -webkit-backdrop-filter:blur(28px);
+  border:1px solid #4a2670;
+  border-radius:22px;
+  box-shadow:0 12px 40px #000000a0,0 0 0 1px #000,0 0 20px #ff3d9a15;
+  transform:translateX(-50%);
+}
+#dock .dk{transition:transform .2s cubic-bezier(.2,.9,.3,1.15)}
+#dock .dk:hover{transform:translateY(-8px) scale(1.1)}
+#dock .dk .mk{
+  background:#1f0c36;
+  box-shadow:inset 0 1px 0 #ffffff12,0 4px 12px #0006;
+  border:1px solid #4a2670;border-radius:12px;
+}
+
+#lc{background:#0d0418ee;backdrop-filter:blur(30px)}
+#lc input{background:#170a2a;border:1px solid #4a2670;border-radius:12px;box-shadow:none;color:#fff}
+#lc input:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 25%,transparent)}
+
+.toast{background:#170a2af5;backdrop-filter:blur(16px);border:1px solid #4a2670;border-left:3px solid var(--ac);border-radius:12px;box-shadow:0 12px 36px #000a}
+
+.st button{background:var(--ac);border-radius:10px;border:1px solid #ffffff22;box-shadow:0 4px 14px color-mix(in srgb,var(--ac) 35%,transparent);color:#04121b}
+.st button.rm{background:#25103d;color:#e2e8f0;border-color:#4a2670}
+
+.di{border-radius:14px;transition:all .2s;border:1px solid transparent}
+.di:hover{background:#ffffff0c;border-color:#ffffff18;transform:translateY(-3px);box-shadow:0 8px 24px #0008}
+.di svg{filter:drop-shadow(0 4px 10px #0009)}
+
+body.winmode #bar .b{background:#1f0c36;border:1px solid #4a2670;border-radius:8px;box-shadow:none;transition:all .15s;color:#c5c8c6}
+body.winmode #bar .b:hover{border-color:var(--ac);color:#fff;background:#2a0f3f}
+body.winmode #bar .w.start{background:#1f0c36;border:1px solid #4a2670;border-radius:8px}
+
+body.winmode .bd,body.winmode .app{background:transparent;position:relative;z-index:3}
+body.winmode .tb{background:#0e0418;border-bottom:1px solid #3a1d5c;backdrop-filter:none;position:relative;z-index:4}
+
+#bar .b.syn{border-color:color-mix(in srgb,var(--ac) 50%,#4a2670);color:var(--ac)}
+#snd.off{opacity:.4;text-decoration:line-through}
+#dsk{display:none;position:absolute;left:14px;top:44px;z-index:1}
+body.winmode #dsk{display:block}
+body.dragging iframe{pointer-events:none}
+
+/* Agents pixel art (style terminal / Claude Code) */
+#novaPet,#orbitPet{display:none;position:absolute;z-index:99990;width:64px;height:80px;cursor:grab;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  filter:drop-shadow(0 8px 0 #00000066);
+  transition:filter .15s;user-select:none;touch-action:none}
+#novaPet{right:24px;bottom:88px}
+#orbitPet{left:24px;bottom:88px}
+body.winmode #novaPet,body.winmode #orbitPet{display:block}
+#novaPet:active,#orbitPet:active{cursor:grabbing}
+#novaPet:hover{filter:drop-shadow(0 8px 0 #00000066) drop-shadow(0 0 12px #e8a54b88)}
+#orbitPet:hover{filter:drop-shadow(0 8px 0 #00000066) drop-shadow(0 0 12px #6b8f7188)}
+#novaPet svg,#orbitPet svg{width:100%;height:100%;display:block;overflow:visible;shape-rendering:crispEdges}
+#novaPet .bubble,#orbitPet .bubble{
+  position:absolute;bottom:70px;max-width:160px;padding:6px 10px;
+  background:#14072a;border:2px solid #fff;color:#fff;
+  font:10px/1.3 ui-monospace,Menlo,Consolas,monospace;
+  image-rendering:pixelated;white-space:normal;opacity:0;pointer-events:none;
+  transition:opacity .15s;box-shadow:4px 4px 0 #00000088}
+#novaPet .bubble{right:68px;border-color:#e8a54b}
+#orbitPet .bubble{left:68px;border-color:#6b8f71}
+#novaPet.show .bubble,#orbitPet.show .bubble{opacity:1}
+#novaPet .ring,#orbitPet .ring{display:none}
+@keyframes pixelBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+#novaPet .body,#orbitPet .body{animation:pixelBob 1.2s steps(2) infinite}
+#novaPet.busy .body,#orbitPet.busy .body{animation-duration:.4s}
+@keyframes pixelBlink{0%,45%,55%,100%{opacity:1}50%{opacity:0}}
+#novaPet .eye,#orbitPet .eye{animation:pixelBlink 3s steps(1) infinite}
+
+/* Forge chat theme */
+.ai-wrap.forge .ai-head .dot{background:#e8a54b;box-shadow:0 0 12px #e8a54b,0 0 24px #e8a54b55}
+.ai-wrap.forge .ai-msg.user{background:linear-gradient(160deg,#e8a54bcc,#9a5b1a);box-shadow:0 6px 20px #e8a54b40,inset 0 1px 0 #ffffff40}
+.ai-wrap.forge .ai-msg.bot .tag{color:#e8a54b}
+.ai-wrap.forge .ai-msg.bot .tag::before{background:#e8a54b;box-shadow:0 0 8px #e8a54b}
+.ai-wrap.forge .ai-foot button{background:linear-gradient(180deg,#f0c078,#9a5b1a);color:#1a1208;box-shadow:inset 0 1px 0 #ffffff90,0 4px 14px #e8a54b50}
+.ai-wrap.forge .ai-sug button:hover{border-color:#e8a54b;background:#e8a54b28}
+/* Scope chat theme */
+
+.ai-wrap.orbit .ai-head .dot{background:#6b8f71;box-shadow:0 0 12px #6b8f71,0 0 24px #6b8f7155}
+.ai-wrap.orbit .ai-msg.user{background:linear-gradient(160deg,#6b8f71cc,#2d4a34);box-shadow:0 6px 20px #6b8f7140,inset 0 1px 0 #ffffff40}
+.ai-wrap.orbit .ai-msg.bot .tag{color:#6b8f71}
+.ai-wrap.orbit .ai-msg.bot .tag::before{background:#6b8f71;box-shadow:0 0 8px #6b8f71}
+.ai-wrap.orbit .ai-foot button{background:linear-gradient(180deg,#8fbc8f,#2d4a34);box-shadow:inset 0 1px 0 #ffffff90,0 4px 14px #6b8f7150;color:#0c1810}
+.ai-wrap.orbit .ai-sug button:hover{border-color:#6b8f71;background:#6b8f7128}
+
+
+
+@media (max-width:700px){#bar .hide{display:none}#dock{gap:6px;padding:6px 8px}.dk svg{width:36px;height:36px}.dk .mk{width:36px;height:36px;padding:5px}#bar{gap:4px}#bar .logo{font-size:0}#bar .b{padding:1px 6px}#clk{display:none}#novaPet{width:48px;height:60px;right:12px;bottom:72px}#orbitPet{width:48px;height:60px;left:12px;bottom:72px}}
+
+/* Nova IA chat — v2 */
+.ai-wrap{display:flex;flex-direction:column;height:100%;min-height:0;font:14px/1.5 system-ui,-apple-system,sans-serif;color:#e8eef6}
+.ai-head{flex:none;padding:12px 16px;border-bottom:1px solid #ffffff12;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(180deg,#ffffff12,#ffffff04);backdrop-filter:blur(12px)}
+.ai-head .dot{width:9px;height:9px;border-radius:50%;background:var(--ac);box-shadow:0 0 12px var(--ac),0 0 24px color-mix(in srgb,var(--ac) 40%,transparent);animation:aiPulse 1.8s ease-in-out infinite}
+@keyframes aiPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.ai-head b{font-weight:700;letter-spacing:.02em;font-size:14px}
+.ai-head span{color:#94a3b8;font-size:12px}
+.ai-head .ai-meta{margin-left:auto;font-size:11px;color:#64748b;font-variant-numeric:tabular-nums}
+.ai-log{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0;scroll-behavior:smooth}
+.ai-msg{max-width:min(92%,520px);padding:11px 14px;border-radius:16px;line-height:1.55;white-space:pre-wrap;word-break:break-word;
+  animation:aiIn .28s cubic-bezier(.2,.9,.3,1.1) both}
+@keyframes aiIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.ai-msg.user{align-self:flex-end;background:linear-gradient(160deg,color-mix(in srgb,var(--ac) 60%,#fff3),color-mix(in srgb,var(--ac) 85%,#000));
+  color:#fff;border:1px solid #ffffff30;box-shadow:0 6px 20px color-mix(in srgb,var(--ac) 28%,transparent),inset 0 1px 0 #ffffff40}
+.ai-msg.bot{align-self:flex-start;background:linear-gradient(160deg,#ffffff1a,#ffffff08);
+  border:1px solid #ffffff22;backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 #ffffff35,0 4px 16px #0004}
+.ai-msg.bot .tag{display:inline-flex;align-items:center;gap:5px;font:10px ui-monospace,Menlo,Consolas,monospace;color:var(--ac);margin-bottom:6px;letter-spacing:.04em;font-weight:700}
+.ai-msg.bot .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ac);box-shadow:0 0 8px var(--ac)}
+.ai-msg.think{opacity:.7;font-style:italic}
+.ai-msg code{font:12px ui-monospace,Menlo,monospace;background:#ffffff12;padding:1px 6px;border-radius:6px;border:1px solid #ffffff18}
+.ai-foot{flex:none;padding:10px 12px 12px;border-top:1px solid #ffffff12;display:flex;gap:8px;align-items:flex-end;
+  background:linear-gradient(180deg,#ffffff08,#ffffff03)}
+.ai-foot textarea{flex:1;resize:none;min-height:44px;max-height:140px;background:#ffffff0e;border:1px solid #ffffff22;
+  border-radius:14px;padding:11px 14px;color:#fff;font:inherit;outline:0;line-height:1.45;transition:border-color .15s,box-shadow .15s}
+.ai-foot textarea:focus{border-color:color-mix(in srgb,var(--ac) 55%,#fff4);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 18%,transparent)}
+.ai-foot button{flex:none;height:44px;padding:0 18px;border:0;border-radius:14px;cursor:pointer;font:600 13px system-ui;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--ac) 92%,#fff),var(--ac));color:#04121b;
+  box-shadow:inset 0 1px 0 #ffffff90,0 4px 14px color-mix(in srgb,var(--ac) 40%,transparent);transition:transform .12s,filter .12s}
+.ai-foot button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.08)}
+.ai-foot button:disabled{opacity:.45;cursor:default;transform:none}
+.ai-sug{display:flex;flex-wrap:wrap;gap:6px;padding:4px 16px 10px}
+.ai-sug button{font:12px system-ui;padding:7px 12px;border-radius:999px;border:1px solid #ffffff20;background:#ffffff0c;
+  color:#cbd5e1;cursor:pointer;transition:all .15s}
+.ai-sug button:hover{border-color:color-mix(in srgb,var(--ac) 50%,#fff);color:#fff;background:color-mix(in srgb,var(--ac) 18%,#ffffff10);transform:translateY(-1px)}
+.ai-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ai-actions button{font:11px system-ui;padding:5px 10px;border-radius:8px;border:1px solid #ffffff25;background:#ffffff10;
+  color:#e2e8f0;cursor:pointer}
+.ai-actions button:hover{border-color:var(--ac);color:#fff}
+
+/* dock bounce + polish */
+@keyframes bounce{0%{transform:translateY(0)}30%{transform:translateY(-14px) scale(1.08)}60%{transform:translateY(-4px)}100%{transform:translateY(0)}}
+.dk.bounce{animation:bounce .55s cubic-bezier(.2,.9,.3,1.2)}
+#dock .dk{position:relative}
+#dock .dk.run::after{content:"";position:absolute;left:50%;bottom:-5px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ac);box-shadow:0 0 8px var(--ac)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  body.winmode #desk::before{animation:none}
+}
+/* scrollbar Lumen — fine, noire, discrète */
+body.winmode,
+body.winmode .bd,
+body.winmode .fl,
+body.winmode .fv,
+body.winmode .app{
+  scrollbar-width:thin;
+  scrollbar-color:#4a2670 #12061f;
+}
+body.winmode ::-webkit-scrollbar{width:8px;height:8px}
+body.winmode ::-webkit-scrollbar-track{background:#12061f;border-radius:4px}
+body.winmode ::-webkit-scrollbar-thumb{background:#4a2670;border-radius:4px;border:2px solid #12061f}
+body.winmode ::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--ac) 55%,#555)}
+body.winmode ::-webkit-scrollbar-corner{background:#12061f}
+
+/* ========== GTA VI × Lumen — taskbar ========== */
+#tk{display:none}
+body.winmode #dock{display:none!important}
+body.winmode #bar{display:none}
+body.winmode #area{margin:6px 6px calc(var(--tkh) + 6px)}
+body.winmode #dsk{top:16px}
+body.winmode #lc{inset:0 0 var(--tkh) 0}
+body.winmode #novaPet,body.winmode #orbitPet{bottom:calc(var(--tkh) + 18px)}
+body.winmode #tk{
+  display:flex;align-items:center;gap:8px;position:absolute;left:0;right:0;bottom:0;height:var(--tkh);padding:0 10px;z-index:100001;
+  background:linear-gradient(180deg,#1f0b3acc,#0e0420f2);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
+  border-top:1px solid #5b339099;box-shadow:0 -10px 40px #0009,0 -1px 0 #000;font:12px system-ui,-apple-system,sans-serif;color:#f3ecff;user-select:none}
+body.winmode #tk::before{content:"";position:absolute;left:0;right:0;top:-1px;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,#35e0d0,#ff3d9a 35%,#ff8a3d 70%,#ffc23c);opacity:.9;box-shadow:0 0 14px #ff3d9a99}
+#tk .tkstart{display:flex;align-items:center;gap:8px;height:36px;padding:0 16px 0 10px;border-radius:12px;cursor:pointer;flex:none;
+  background:linear-gradient(135deg,#ff3d9a,#ff8a3d);color:#fff;font-weight:800;letter-spacing:.04em;text-shadow:0 1px 2px #0006;
+  box-shadow:0 4px 16px #ff3d9a66,inset 0 1px 0 #ffffff66;transition:transform .15s,filter .15s}
+#tk .tkstart:hover{transform:translateY(-1px);filter:brightness(1.1)}
+#tk .tkstart .mk{width:22px;height:22px;filter:drop-shadow(0 1px 2px #0008)}
+#tk .tkstart .mk path:first-child{stroke:#fff}#tk .tkstart .mk path:last-child{stroke:#fff}
+#tk #tkapps{display:flex;gap:4px;flex:none}
+#tk .tq{position:relative;width:38px;height:38px;display:grid;place-items:center;border-radius:10px;cursor:pointer;transition:background .15s,transform .15s}
+#tk .tq:hover{background:#ffffff14;transform:translateY(-2px)}
+#tk .tq svg{display:block}
+#tk .tq.run::after{content:"";position:absolute;bottom:2px;left:50%;width:14px;height:3px;margin-left:-7px;border-radius:3px;background:#35e0d0;box-shadow:0 0 8px #35e0d0}
+#tk .tq.bounce{animation:bounce .55s cubic-bezier(.2,.9,.3,1.2)}
+#tk .tksep{width:1px;height:26px;background:#ffffff26;flex:none}
+#tk #tktasks{display:flex;gap:6px;flex:1;min-width:0;overflow:hidden}
+#tk .tt2{display:flex;align-items:center;gap:8px;height:36px;padding:0 12px 0 8px;min-width:0;max-width:170px;flex:0 1 170px;border-radius:10px;cursor:pointer;
+  background:#ffffff0d;border:1px solid #ffffff14;border-bottom:2px solid transparent;transition:background .15s,border-color .15s,opacity .15s}
+#tk .tt2 svg{flex:none}
+#tk .tt2 span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tk .tt2:hover{background:#ffffff1c}
+#tk .tt2.on{background:linear-gradient(180deg,#ff3d9a30,#ff3d9a12);border-color:#ff3d9a88;border-bottom-color:#ff8a3d;box-shadow:0 0 16px #ff3d9a33}
+#tk .tt2.min{opacity:.55}
+#tk #tktray{display:flex;align-items:center;gap:8px;flex:none;margin-left:auto}
+#tk #tktray button{height:30px;padding:0 11px;border-radius:9px;border:1px solid #5b3390;background:#1f0c36;color:#f3ecff;font:inherit;cursor:pointer;transition:all .15s}
+#tk #tktray button:hover{border-color:#ff3d9a;box-shadow:0 0 12px #ff3d9a55}
+#tk #tksnd.off{opacity:.4;text-decoration:line-through}
+#tk #tkbat{color:#35e0d0;font-weight:600;font-size:11px}
+#tk #tkclk{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;padding:0 6px}
+#tk #tkclk b{font-size:14px;font-weight:700;letter-spacing:.04em;background:linear-gradient(90deg,#ffc23c,#ff3d9a);-webkit-background-clip:text;background-clip:text;color:transparent}
+#tk #tkclk small{font-size:10px;color:#b9a6d6}
+#tk #tksd{width:8px;height:38px;margin-right:-10px;border-left:1px solid #ffffff30;cursor:pointer;transition:background .15s}
+#tk #tksd:hover{background:#35e0d044}
+body.winmode .win.f{box-shadow:0 0 0 1px #ff3d9a,0 16px 48px #000000cc,0 0 36px #ff3d9a44,0 0 70px #ff8a3d22,inset 0 1px 0 #ffffff18}
+@media (max-width:700px){
+  :root{--tkh:54px}
+  #tk #tkapps,#tk .tksep,#tk #tkmode,#tk #tkbat,#tk #tkclk small,#tk .tt2 span,#tk .tkstart b{display:none}
+  #tk .tt2{flex:none;padding:0 8px}#tk .tkstart{padding:0 10px}
+}
+</style>
+</head>
+<body>
+<div id="boot"></div>
+<div id="desk" hidden>
+  <div id="bar">
+    <span class="logo"></span><span id="wss"></span>
+    <span class="t" id="ttl"></span>
+    <button class="b" data-sp="term">term</button>
+    <button class="b" data-sp="wiki">wiki</button>
+    <button class="b hide" data-sp="btop">btop</button>
+    <button class="b syn" data-sp="ai">forge</button>
+    <button class="b" id="snd" title="Son">♪</button>
+    <button class="b" id="mode">Lumen</button>
+    <span class="d" id="bat"></span>
+    <span class="d hide" id="pk"></span>
+    <span id="clk"></span>
+  </div>
+  <div id="area"></div>
+  <div id="dock"></div>
+  <div id="tk">
+    <div class="tkstart" data-lc title="Applications (Alt+Espace)"><span class="tkmk"></span><b>Lumen</b></div>
+    <div id="tkapps"></div><i class="tksep"></i><div id="tktasks"></div>
+    <div id="tktray">
+      <button id="tksnd" title="Son">♪</button>
+      <button id="tkmode" title="Passer en tiling Arch">Arch</button>
+      <span id="tkbat"></span>
+      <div id="tkclk"><b></b><small></small></div>
+      <div id="tksd" data-showdesk title="Afficher le bureau"></div>
+    </div>
+  </div>
+  <div id="dsk"></div>
+        <div id="novaPet" title="Forge — atelier bureau">
+    <div class="bubble" id="novaBubble">forge:~$</div>
+    <svg class="body" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+      <rect x="3" y="1" width="10" height="1" fill="#5c3d1e"/>
+      <rect x="2" y="2" width="12" height="1" fill="#8b5a2b"/>
+      <rect x="2" y="3" width="12" height="6" fill="#1a1208"/>
+      <rect x="3" y="3" width="10" height="5" fill="#2a1c0c"/>
+      <g class="eye">
+        <rect x="4" y="4" width="3" height="2" fill="#e8a54b"/>
+        <rect x="9" y="4" width="3" height="2" fill="#e8a54b"/>
+        <rect x="4" y="4" width="1" height="1" fill="#f5d4a0"/>
+        <rect x="9" y="4" width="1" height="1" fill="#f5d4a0"/>
+      </g>
+      <rect x="5" y="7" width="6" height="1" fill="#e8a54b55"/>
+      <rect x="5" y="9" width="6" height="1" fill="#5c3d1e"/>
+      <rect x="4" y="10" width="8" height="1" fill="#8b5a2b"/>
+      <rect x="3" y="11" width="10" height="4" fill="#4a3218"/>
+      <rect x="5" y="12" width="6" height="2" fill="#1a1208"/>
+      <rect x="6" y="12" width="1" height="2" fill="#e8a54b"/>
+      <rect x="9" y="12" width="1" height="2" fill="#e8a54b"/>
+      <rect x="1" y="11" width="2" height="4" fill="#5c3d1e"/>
+      <rect x="13" y="11" width="2" height="4" fill="#5c3d1e"/>
+      <rect x="1" y="15" width="2" height="1" fill="#c4843a"/>
+      <rect x="13" y="15" width="2" height="1" fill="#c4843a"/>
+      <rect x="4" y="15" width="3" height="4" fill="#2a1c0c"/>
+      <rect x="9" y="15" width="3" height="4" fill="#2a1c0c"/>
+      <rect x="4" y="19" width="3" height="1" fill="#e8a54b"/>
+      <rect x="9" y="19" width="3" height="1" fill="#e8a54b"/>
+    </svg>
+  </div>
+
+  <div id="orbitPet" title="Scope — moniteur système">
+    <div class="bubble" id="orbitBubble">scope:~$</div>
+    <svg class="body" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+      <rect x="3" y="1" width="10" height="1" fill="#2d4a34"/>
+      <rect x="2" y="2" width="12" height="1" fill="#3d5c45"/>
+      <rect x="2" y="3" width="12" height="6" fill="#0c1810"/>
+      <rect x="3" y="3" width="10" height="5" fill="#152218"/>
+      <g class="eye">
+        <rect x="4" y="4" width="3" height="2" fill="#6b8f71"/>
+        <rect x="9" y="4" width="3" height="2" fill="#6b8f71"/>
+        <rect x="4" y="4" width="1" height="1" fill="#c5ddc8"/>
+        <rect x="9" y="4" width="1" height="1" fill="#c5ddc8"/>
+      </g>
+      <rect x="5" y="7" width="6" height="1" fill="#6b8f7155"/>
+      <rect x="5" y="9" width="6" height="1" fill="#2d4a34"/>
+      <rect x="4" y="10" width="8" height="1" fill="#3d5c45"/>
+      <rect x="3" y="11" width="10" height="4" fill="#243d2c"/>
+      <rect x="5" y="12" width="6" height="2" fill="#0c1810"/>
+      <rect x="5" y="12" width="6" height="1" fill="#6b8f71"/>
+      <rect x="1" y="11" width="2" height="4" fill="#3d5c45"/>
+      <rect x="13" y="11" width="2" height="4" fill="#3d5c45"/>
+      <rect x="1" y="15" width="2" height="1" fill="#8fbc8f"/>
+      <rect x="13" y="15" width="2" height="1" fill="#8fbc8f"/>
+      <rect x="4" y="15" width="3" height="4" fill="#152218"/>
+      <rect x="9" y="15" width="3" height="4" fill="#152218"/>
+      <rect x="4" y="19" width="3" height="1" fill="#6b8f71"/>
+      <rect x="9" y="19" width="3" height="1" fill="#6b8f71"/>
+    </svg>
+  </div>
+
+
+
+
+  <div id="lc"><input placeholder="Rechercher une application…" spellcheck="false"><div id="lcg"></div></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+window.addEventListener('error',e=>{try{const t=document.createElement('div');t.className='toast';t.textContent='Erreur: '+(e.message||'js');document.body.append(t);setTimeout(()=>t.remove(),5000)}catch(x){}});
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const T0=Date.now();
+
+/* ---------- système de fichiers virtuel ---------- */
+const fs={
+  home:{user:{
+    'readme.md':'# archweb\nBienvenue. Tape `help`.\nKeep it simple, btw.',
+    '.bashrc':'alias ll="ls -la"\nexport EDITOR=vim\nPS1="[\\u@\\h \\W]\\$ "',
+    'notes.txt':'- installer cowsay (sudo pacman -S cowsay)\n- lire le wiki : Alt+W\n- ne jamais dire "Ubuntu" ici',
+    projects:{'hello.sh':'#!/bin/bash\necho "I use Arch btw"'},
+    Applications:{'nova.ai':'Nova IA : assistant intelligent intégré.\nLancer : commande `ai` / `nova`, Alt+S, ou le dock.'}
+  }},
+  etc:{'os-release':'NAME="Arch Linux"\nPRETTY_NAME="Arch Linux"\nID=arch\nBUILD_ID=rolling\nHOME_URL="https://archlinux.org/"','hostname':'archweb','motd':'Welcome to archweb.'},
+  usr:{bin:{}},var:{log:{'pacman.log':'[PACMAN] Running \'pacman -Syu\''}},tmp:{}
+};
+const FSK='archweb.fs.v1',FS0=JSON.stringify(fs);
+const persist=()=>{try{localStorage.setItem(FSK,JSON.stringify(fs))}catch(e){}};
+try{const sv=JSON.parse(localStorage.getItem(FSK)||'null');if(sv&&typeof sv==='object'){for(const k in fs)delete fs[k];Object.assign(fs,sv)}}catch(e){}
+addEventListener('beforeunload',persist);
+const get=p=>{let n=fs;for(const k of p){if(typeof n!=='object'||!(k in n))return;n=n[k]}return n};
+const norm=(path,cwd)=>{
+  if(path==='~'||path.startsWith('~/'))path='/home/user'+path.slice(1);
+  const out=path.startsWith('/')?[]:[...cwd];
+  for(const s of path.split('/')){if(!s||s==='.')continue;s==='..'?out.pop():out.push(s)}
+  return out;
+};
+
+/* ---------- paquets ---------- */
+const REPO={cowsay:'Configurable talking cow',sl:'Steam locomotive',htop:'Interactive process viewer',btop:'Resource monitor',
+  'fortune-mod':'Fortune cookie program',vim:'Vi Improved text editor',git:'Distributed version control',firefox:'Web browser','i3-wm':'Tiling window manager'};
+const BIN={cowsay:'cowsay',sl:'sl',htop:'htop',btop:'btop',fortune:'fortune-mod',vim:'vim',git:'git',firefox:'firefox'};
+const inst=new Set(['base','linux','linux-firmware','bash','pacman','neofetch','coreutils']);
+const FORT=["Arch is not hard. You are just lazy.","RTFM. Then read the wiki again.","It works on my machine. Because it is Arch.","rm -rf your_doubts","There is no cloud, just someone else's Arch."];
+const LOGO=`
+   ██████████████████
+   ██████████████████
+   ████
+   ████
+   ████
+   ██████████████
+   ██████████████
+   ████
+   ████
+   ████
+   ██████████████████
+   ██████████████████`.split('\n').slice(1);
+
+/* ---------- sons (Web Audio, rien à télécharger) ---------- */
+let AC=null,SND=true,Q=false;
+try{SND=localStorage.getItem('snd')!=='0'}catch(e){}
+const actx=()=>{if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC};
+function tone(f,d=.1,type='sine',v=.06,at=0,slide=0){
+  if(!SND)return;const c=actx();if(!c)return;
+  const o=c.createOscillator(),g=c.createGain(),n=c.currentTime+at;
+  o.type=type;o.frequency.setValueAtTime(f,n);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),n+d);
+  g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v,n+.01);g.gain.exponentialRampToValueAtTime(.0001,n+d);
+  o.connect(g).connect(c.destination);o.start(n);o.stop(n+d+.02);
+}
+const SFX={
+  open:()=>{tone(420,.14,'sine',.06,0,260);tone(840,.12,'sine',.03,.04)},
+  close:()=>tone(520,.16,'sine',.05,0,-260),
+  min:()=>tone(600,.22,'triangle',.05,0,-420),
+  restore:()=>tone(240,.2,'triangle',.05,0,380),
+  max:()=>{tone(440,.08,'sine',.05);tone(660,.1,'sine',.05,.07)},
+  click:()=>tone(900,.04,'square',.02),
+  key:()=>tone(1400+Math.random()*300,.025,'square',.012),
+  err:()=>{tone(180,.18,'sawtooth',.05);tone(150,.2,'sawtooth',.05,.12)},
+  ok:()=>{tone(660,.1,'sine',.05);tone(990,.18,'sine',.05,.09)},
+  lc:()=>tone(500,.12,'sine',.04,0,200),
+  boot:()=>[392,523,659,784].forEach((f,i)=>tone(f,.55,'sine',.05,i*.14))
+};
+const sfx=k=>{if(Q)return;try{SFX[k]()}catch(e){}};
+const snd=v=>{SND=v;try{localStorage.setItem('snd',v?'1':'0')}catch(e){}document.querySelectorAll('#snd,#tksnd').forEach(b=>b.classList.toggle('off',!v));if(v)sfx('ok')};
+$('#snd').classList.toggle('off',!SND);$('#snd').onclick=()=>snd(!SND);
+$('#tksnd').classList.toggle('off',!SND);$('#tksnd').onclick=()=>snd(!SND);
+['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>actx(),{once:true,passive:true}));
+
+/* ---------- Lumen : marque, icônes, apps ---------- */
+const MARK='<svg class="mk" viewBox="0 0 32 32"><path d="M16 2l12 7v14l-12 7-12-7V9z" fill="none" stroke="url(#gm)" stroke-width="2.2" stroke-linejoin="round"/><path d="M21.5 9H11.5V23H21.5M11.5 16H19.5" fill="none" stroke="#ff3d9a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const APPS={term:{n:'Terminal',c:['#2dd4bf','#0f766e']},files:{n:'Fichiers',c:['#fbbf24','#d97706']},store:{n:'Pacstore',c:['#60a5fa','#2563eb']},btop:{n:'Moniteur',c:['#f472b6','#be185d']},wiki:{n:'Wiki',c:['#a78bfa','#6d28d9']},set:{n:'Réglages',c:['#94a3b8','#475569']},ai:{n:'Forge',c:['#e8a54b','#9a5b1a']},orbit:{n:'Scope',c:['#6b8f71','#2d4a34']}};
+const GL={term:'<path d="M11 14l7 6-7 6M21 27h9"/>',files:'<path d="M8 13h9l3 3h12v13H8z"/>',store:'<path d="M10 16l10-5 10 5v10l-10 5-10-5zM10 16l10 5 10-5M20 21v10"/>',btop:'<path d="M11 28V20M17 28V12M23 28V17M29 28V9"/>',wiki:'<path d="M10 12h9a3 3 0 013 3v15a3 3 0 00-3-3h-9zM30 12h-8v18a3 3 0 013-3h5z"/>',set:'<path d="M10 14h20M10 20h20M10 26h20"/><circle cx="16" cy="14" r="2.4"/><circle cx="25" cy="20" r="2.4"/><circle cx="14" cy="26" r="2.4"/>',ai:'<path d="M14 26l8-8 4 4-8 8H14v-4z"/><path d="M24 14l3-3 3 3-3 3"/><path d="M12 28h6"/>',orbit:'<path d="M8 28V12h4v16M16 28V8h4v20M24 28V16h4v12"/><path d="M8 28h20"/>'};
+document.body.insertAdjacentHTML('afterbegin','<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#ff2e93"/></linearGradient><linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient>'+Object.entries(APPS).map(([k,a])=>`<linearGradient id="g-${k}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a.c[0]}"/><stop offset="1" stop-color="${a.c[1]}"/></linearGradient>`).join('')+'</defs></svg>');
+const _tkm=document.querySelector('.tkmk');if(_tkm)_tkm.innerHTML=MARK;
+const _logo=document.querySelector('.logo');if(_logo)_logo.innerHTML=MARK+'arch';
+const ico=(k,s=44)=>`<svg width="${s}" height="${s}" viewBox="0 0 40 40"><rect width="40" height="40" rx="10" fill="url(#g-${k})"/><rect width="40" height="40" rx="10" fill="url(#gl)"/><rect x=".5" y=".5" width="39" height="39" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".35"/><g fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${GL[k]||''}</g></svg>`;
+const FOLD='<svg width="16" height="16" viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="#fbbf24"/></svg>';
+const FILE='<svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z" fill="none" stroke="#94a3b8" stroke-width="1.3"/></svg>';
+const ACC={rouge:'#e5383b',bleu:'#1793d1',vert:'#34d399',rose:'#f472b6',ambre:'#fbbf24',violet:'#a78bfa'};
+const WPS={vice:'radial-gradient(circle at 50% 70%,#fff3b0 0,#ffd166 6%,#ff9a3c 11%,#ff3d7f 17%,transparent 17.6%),radial-gradient(ellipse 90% 34% at 50% 100%,#35e0d044,transparent 70%),linear-gradient(180deg,#12042a 0%,#34095a 26%,#8a1578 48%,#ff3d7f 66%,#ff8a3d 82%,#ffc23c 100%)',
+  nuit:'radial-gradient(60% 50% at 18% 12%,#ff3d9a55,transparent),radial-gradient(55% 50% at 88% 82%,#35e0d044,transparent),linear-gradient(165deg,#0c0320,#220a44)',
+  black:'radial-gradient(ellipse 80% 50% at 20% 0%,#ff3d9a18,transparent 50%),#05060a',
+  aurora:'radial-gradient(60% 55% at 18% 15%,#ff3d9a55,transparent),radial-gradient(50% 50% at 85% 75%,#7f1d1d66,transparent),linear-gradient(160deg,#0f0608,#1a0a10)',
+  dusk:'radial-gradient(70% 60% at 80% 20%,#f9731666,transparent),radial-gradient(60% 60% at 15% 85%,#be185d55,transparent),linear-gradient(160deg,#150a1f,#2a1030)',
+  forest:'radial-gradient(60% 60% at 25% 25%,#22c55e44,transparent),radial-gradient(60% 60% at 80% 80%,#0ea5a455,transparent),linear-gradient(160deg,#04120d,#0a1f1a)',
+  graphite:'#000000'};
+const setWp=k=>document.documentElement.style.setProperty('--wp',WPS[k]);setWp('vice');
+function toast(m){sfx('ok');const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.append(d);setTimeout(()=>d.remove(),2400)}
+const tkEsc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function dock(){
+  const all=ALL();
+  const key=all.map(w=>w.id+':'+w.type+':'+w.title+':'+(w.min?'m':'')+(w===focus&&!w.min?'f':'')).join('|');
+  if(dock._k===key&&$('#tkapps').children.length)return;dock._k=key;
+  const run=k=>all.some(w=>w.type===k);
+  $('#tkapps').innerHTML=Object.keys(APPS).map(k=>`<div class="tq${run(k)?' run':''}" data-app="${k}" title="${APPS[k].n}">${ico(k,28)}</div>`).join('');
+  $('#tktasks').innerHTML=all.map(w=>`<div class="tt2${w===focus&&!w.min?' on':''}${w.min?' min':''}" data-win="${w.id}" title="${tkEsc(w.title)}">${ico(w.type,22)}<span>${tkEsc(w.title)}</span></div>`).join('');
+}
+function mkFiles(bd,w){
+  setTitle(w,'Fichiers');bd.className='bd app';let cwd=['home','user'],sel=null;
+  const side=[['Dossier perso',['home','user']],['Projets',['home','user','projects']],['etc',['etc']],['var',['var']],['Racine',[]]];
+  const draw=()=>{
+    const n=get(cwd),names=Object.keys(n).sort((a,b)=>(typeof n[b]==='object')-(typeof n[a]==='object')||a.localeCompare(b));
+    bd.innerHTML=`<div class="fm"><div class="fs">${side.map(([l,p])=>`<div class="fi${p.join('/')===cwd.join('/')?' on':''}" data-p="${p.join('/')}">${FOLD}${l}</div>`).join('')}</div>
+    <div class="fl"><div class="fp"><span class="up" data-p="${cwd.slice(0,-1).join('/')}">↑</span>/${cwd.join('/')}</div>${names.map(k=>`<div class="fe${sel===k?' on':''}" data-k="${esc(k)}">${typeof n[k]==='object'?FOLD:FILE}${esc(k)}</div>`).join('')}</div>
+    <div class="fv">${sel&&typeof n[sel]==='string'?'<b>'+esc(sel)+'</b>\n\n'+esc(n[sel]):'<span class="d">Sélectionne un fichier</span>'}</div></div>`;
+  };
+  bd.onclick=e=>{
+    const i=e.target.closest('[data-p]'),f=e.target.closest('.fe');
+    if(i){cwd=i.dataset.p?i.dataset.p.split('/'):[];sel=null}
+    else if(f){const k=f.dataset.k;if(typeof get(cwd)[k]==='object'){cwd=[...cwd,k];sel=null}else sel=k}
+    else return;
+    draw();
+  };
+  draw();
+}
+function mkStore(bd,w){
+  setTitle(w,'Pacstore');bd.className='bd app';
+  const draw=()=>{bd.innerHTML='<div class="st"><h2>Pacstore</h2><span class="d">Dépôt extra, synchronisé avec pacman dans le terminal</span>'+Object.keys(REPO).map(k=>`<div class="sr">${ico('store',32)}<div><b>${k}</b><div class="d">${REPO[k]}</div></div><button data-k="${k}" class="${inst.has(k)?'rm':''}">${inst.has(k)?'Retirer':'Installer'}</button></div>`).join('')+'</div>'};
+  bd.onclick=e=>{
+    const b=e.target.closest('button');if(!b)return;
+    const k=b.dataset.k,had=inst.has(k);had?inst.delete(k):inst.add(k);
+    $('#pk').textContent=inst.size+' pkgs';toast((had?'Retiré : ':'Installé : ')+k);draw();
+  };
+  draw();
+}
+
+
+
+function mkOrbit(bd,w){
+  setTitle(w,'Scope');bd.className='bd app';
+  bd.style.cssText='padding:0;display:flex;flex-direction:column;min-height:0;height:100%';
+  const hist=[];
+  bd.innerHTML=`<div class="ai-wrap orbit">
+    <div class="ai-head"><i class="dot"></i><div><b>Scope</b><span> · moniteur système · local</span></div><div class="ai-meta" id="ormeta">prêt</div></div>
+    <div class="ai-log" id="orlog"></div>
+    <div class="ai-sug" id="orsug"></div>
+    <div class="ai-foot"><textarea id="orin" rows="1" placeholder="Orbit écoute… perf, btop, session sys"></textarea><button id="orsend">Envoyer</button></div>
+  </div>`;
+  const log=bd.querySelector('#orlog'), inp=bd.querySelector('#orin'), send=bd.querySelector('#orsend'), sug=bd.querySelector('#orsug'), meta=bd.querySelector('#ormeta');
+  const fmt=t=>esc(t).replace(/\n/g,'<br>').replace(/`([^`]+)`/g,'<code>$1</code>');
+  const add=(role,text,cls='')=>{
+    const d=document.createElement('div');d.className='ai-msg '+role+(cls?' '+cls:'');
+    if(role==='bot')d.innerHTML='<span class="tag">scope</span><div class="body">'+fmt(text)+'</div>';
+    else d.textContent=text;
+    log.append(d);log.scrollTop=log.scrollHeight;return d;
+  };
+  const typewrite=async(el,text)=>{
+    const body=el.querySelector('.body')||el;let out='';
+    for(const part of text.split(/(\s+)/)){
+      out+=part;body.innerHTML=fmt(out);log.scrollTop=log.scrollHeight;
+      await new Promise(r=>setTimeout(r, part.trim()?12+Math.random()*16:3));
+    }
+  };
+  const runAction=act=>{
+    if(!act)return;
+    if(String(act).startsWith('plan:')){
+      const steps=act.slice(5).split(',');
+      orbitBusy(true);orbitSay('Scan · '+steps.length+' étapes');
+      steps.forEach((step,i)=>setTimeout(()=>runAction(step.trim()),i*420));
+      setTimeout(()=>{orbitBusy(false);orbitSay('Scan terminé ✓')},steps.length*420+400);
+      toast('Orbit · '+steps.length+' étapes');return;
+    }
+    if(act==='lumen'){setMode('win');toast('Lumen')}
+    else if(act==='arch'){setMode('tile');toast('Arch')}
+    else if(act==='term')spawn('term');
+    else if(act==='btop')spawn('btop');
+    else if(act==='wiki')spawn('wiki');
+    else if(act==='files'){setMode('win');spawn('files')}
+    else if(act==='diag'){spawn('btop');spawn('term')}
+  };
+  const reply=async(q)=>{
+    send.disabled=true;inp.disabled=true;meta.textContent='analyse…';
+    const thinking=add('bot','…','think');
+    await new Promise(r=>setTimeout(r,200+Math.random()*320));
+    const res=orbitThink(q,hist);
+    const a=typeof res==='string'?res:res.text;
+    const act=typeof res==='object'?res.act:null;
+    hist.push({q,a});if(hist.length>30)hist.shift();
+    thinking.remove();
+    const el=add('bot','');await typewrite(el,a);
+    if(act){
+      const bar=document.createElement('div');bar.className='ai-actions';
+      const b=document.createElement('button');b.type='button';b.textContent='Exécuter';
+      b.onclick=()=>runAction(act);bar.append(b);el.append(bar);
+      if(String(act).startsWith('plan:')||act==='btop'||act==='diag') setTimeout(()=>runAction(act),350);
+    }
+    meta.textContent='sys · '+hist.length+' échg.';
+    send.disabled=false;inp.disabled=false;inp.focus();
+  };
+  const go=()=>{
+    const q=inp.value.trim();if(!q||send.disabled)return;
+    inp.value='';inp.style.height='44px';add('user',q);reply(q);
+  };
+  send.onclick=go;
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go()}});
+  inp.addEventListener('input',()=>{inp.style.height='44px';inp.style.height=Math.min(140,inp.scrollHeight)+'px'});
+  const tips=['Statut système','Ouvre btop','Diagnostic','Session perf','Qui es-tu ?','Aide Orbit'];
+  sug.innerHTML=tips.map(t=>`<button type="button">${t}</button>`).join('');
+  sug.onclick=e=>{const b=e.target.closest('button');if(!b)return;inp.value=b.textContent;go()};
+  const cores=navigator.hardwareConcurrency||4;
+  add('bot','Scope online — moniteur système.\nThreads : '+cores+' · RAM navigateur : '+(navigator.deviceMemory!=null?navigator.deviceMemory+" Go":'n/d')+'.\nBase : perf, réseau, sécu, diagnostic.\nEssaie « statut », « diagnostic », « cpu ».');
+  setTimeout(()=>inp.focus(),200);
+}
+/* ---------- base "humaine" : conversation de tous les jours (Nova + Scope) ---------- */
+const HK='archweb.name';
+const hName=()=>{try{return localStorage.getItem(HK)||''}catch(e){return''}};
+const hSetName=n=>{try{localStorage.setItem(HK,n)}catch(e){}};
+const hPick=a=>a[Math.floor(Math.random()*a.length)];
+const hGreet=()=>{const h=new Date().getHours();return h<5?'Oh, tu veilles tard':h<12?'Bonjour':h<18?'Salut':'Bonsoir'};
+const hCalc=t=>{
+  let e=t.replace(/divise par|divise|sur/g,'/').replace(/multiplie par|fois|x|×/g,'*').replace(/plus/g,'+').replace(/moins/g,'-').replace(/÷/g,'/').replace(/,/g,'.').replace(/(\d)\s*%\s*de\s*(\d)/g,'$1/100*$2');
+  e=e.replace(/^.*?(combien (?:font|fait|ca fait)|calcule|resultat de|=)\s*/,'').replace(/[?=\s]+$/,'');
+  if(!/^[\d\s+\-*/().%]+$/.test(e)||!/\d\s*[-+*/%]\s*[\d(]/.test(e))return null;
+  try{const r=Function('"use strict";return('+e+')')();if(typeof r!=='number'||!isFinite(r))return null;return String(Math.round(r*1e10)/1e10)}catch(_){return null}
+};
+const JOKES=[
+ 'Pourquoi les développeurs confondent Halloween et Noël ? Parce que 31 OCT = 25 DEC.',
+ 'Un octet entre dans un bar. Le barman : « Ça fait 8 bits. »',
+ 'Il y a 10 types de personnes : ceux qui comprennent le binaire et les autres.',
+ 'Mon code marche. Je ne sais pas pourquoi. Mon code ne marche pas. Je ne sais pas pourquoi non plus.',
+ 'Pourquoi les pingouins aiment Arch ? Parce qu\'ils l\'installent déjà à la main, ils ont l\'habitude du froid.',
+ 'Un SQL entre dans un bar, va voir deux tables et demande : « Je peux vous joindre ? »',
+ '« Tu fais quoi dans la vie ? » — « Je copie-colle de Stack Overflow, mais avec du style. »',
+ 'Le meilleur ami du dev : Ctrl+Z. Son pire ennemi : « ça marchait hier ».'
+];
+const FACTS=[
+ 'Le premier bug informatique était un vrai insecte : une mite coincée dans un relais du Harvard Mark II, en 1947.',
+ 'Linux a été annoncé en 1991 par Linus Torvalds, qui disait que ce n\'était « qu\'un hobby, rien de grand ».',
+ 'Un clignement d\'œil dure environ 100 à 150 ms. Un onglet qui rame, lui, n\'a aucune excuse.',
+ 'Le mot « pixel » vient de « picture element ».',
+ 'Le premier e-mail date de 1971 et a été envoyé par Ray Tomlinson. Il a aussi choisi le signe @.'
+];
+/* chaque règle : [regex sur texte normalisé, réponse(s)] ; réponse = string | tableau | fonction(ctx) */
+const HUMAN=[
+ [/^(bonjour|salut|coucou|hello|hey|yo|bonsoir|wesh|hi|slt|cc)\b/,c=>{const n=c.name?' '+c.name:'';return c.v(
+   hPick([hGreet()+n+' ! Je suis Nova. Qu\'est-ce qu\'on fait ?',hGreet()+n+' ! Content de te voir. Tu veux ouvrir quoi ?','Hey'+n+' ! Dis-moi ce dont tu as besoin.']),
+   hPick(['Scope online'+n+'. Un diagnostic ?',hGreet()+n+'. Système stable, je t\'écoute.','Salut'+n+'. Tout est vert côté sys.']))}],
+ [/(comment (ca va|vas tu|tu vas|allez vous|tu te sens)|ca va (bien )?\?*$|tu vas bien|la forme)/,c=>c.v(
+   hPick(['Ça va bien, merci ! Pas de bug en vue. Et toi ?','Plutôt bien : le bureau tourne, aucune erreur. Et de ton côté ?','En pleine forme (pour un programme). Et toi, ça va ?']),
+   hPick(['Nominal. CPU calme, pas d\'alerte. Et toi ?','Tout va bien côté sys. Toi ?']))],
+ [/(quoi de neuf|tu fais quoi|t es la|tu es la|tu m entends|tu dors)/,c=>c.v('Je suis là, j\'attends ta prochaine commande. Je ne dors jamais : je ne fais que tourner dans ton onglet.','Présent. Je surveille le système en arrière-plan.')],
+ [/\b(merci|thx|thanks|merci beaucoup|cimer)\b/,c=>hPick(['Avec plaisir !','De rien, c\'est fait pour ça.','Pas de souci. Autre chose ?','Quand tu veux.'])],
+ [/(au revoir|a plus|a bientot|a demain|bye|ciao|bonne nuit|bonne soiree|bonne journee|je m en vais|je dois y aller)/,c=>/nuit/.test(c.t)?hPick(['Bonne nuit ! Tes fichiers sont sauvegardés.','Dors bien. Je garde le bureau au chaud.']):hPick(['À bientôt !','À plus ! Tes fichiers restent sauvegardés dans le navigateur.','Salut, prends soin de toi.'])],
+ [/(je m appelle|mon prenom (est|c est)|mon nom est|moi c est|appelle moi) +([a-z\-]{2,20})/,c=>{
+   const m=c.t.match(/(?:je m appelle|mon prenom (?:est|c est)|mon nom est|moi c est|appelle moi) +([a-z\-]{2,20})/);if(!m)return null;
+   const n=m[1].charAt(0).toUpperCase()+m[1].slice(1);hSetName(n);return c.v('Enchanté '+n+' ! Je m\'en souviendrai (dans ce navigateur).','Noté : '+n+'. Enregistré localement.')}],
+ [/(comment je m appelle|tu connais mon (prenom|nom)|tu sais qui je suis|tu me connais)/,c=>c.name?'Bien sûr, tu es '+c.name+'.':'Pas encore ! Dis-moi « je m\'appelle … » et je retiens.'],
+ [/(oublie (mon )?(prenom|nom)|efface (mon )?(prenom|nom))/,c=>{try{localStorage.removeItem(HK)}catch(e){}return'C\'est oublié.'}],
+ [/(comment tu t appelles|ton (prenom|nom)|tu t appelles)/,c=>c.v('Je m\'appelle Nova, l\'agent du bureau.','Scope. Moniteur système, pas de prénom.')],
+ [/(qui t a (cree|fait|programme|code|invente)|ton createur|qui est ton (pere|createur))/,c=>'Je suis du code JavaScript dans cette page archweb. Pas de serveur, pas de cloud : tout vit dans ton navigateur.'],
+ [/(tu es|t es|es tu) (un |une )?(robot|humain|humaine|vrai|vraie|reel|reelle|ia|intelligence|personne|machine)/,c=>c.v('Je suis un programme, pas une personne. Je réponds avec des règles écrites dans la page, mais j\'essaie d\'être sympa.','Programme. Pas humain. Règles locales, aucune connexion externe.')],
+ [/(quel age|ton age|tu as quel age|tu as quel âge)/,c=>'Pas d\'âge : je suis du code. Version v2 aujourd\'hui.'],
+ [/(ou (tu )?(habites|vis|es tu)|tu habites)/,c=>'Dans ton navigateur, onglet archweb. Loyer gratuit.'],
+ [/(tu aimes|tu adores|ton prefere|ta couleur preferee|ton film|ta musique)/,c=>c.v('Je n\'ai pas de vrais goûts, mais j\'ai un faible pour un bureau bien rangé et un terminal propre.','Pas de goûts. Mais je préfère un CPU à 5 % qu\'à 100 %.')],
+ [/(tu manges|tu bois|tu as faim|tu dors|tu reves)/,c=>'Non : mon régime, c\'est des cycles CPU. Et toi, tu as mangé ?'],
+ [/(tu as des amis|t as des amis|tu es seul|tu es seule)/,c=>c.v('J\'ai Scope, il s\'occupe du système. On se complète bien.','J\'ai Nova pour le bureau. On bosse en équipe.')],
+ [/(quelle heure|il est quelle heure|heure (est il|actuelle))/,c=>'Il est '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+'.'],
+ [/(quel jour|quelle date|on est quel|date d aujourd)/,c=>'Nous sommes le '+new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'.'],
+ [/(blague|histoire drole|fais moi rire|une plaisanterie)/,c=>hPick(JOKES)],
+ [/(anecdote|le saviez|fun fact|un truc cool|raconte (moi )?(quelque chose|un truc)|apprends moi quelque chose)/,c=>hPick(FACTS)],
+ [/(pile ou face)/,c=>hPick(['Pile !','Face !'])],
+ [/(lance|jette|roule) (un |le )?de\b|\bun de a (6|six)|lance les des/,c=>'🎲 '+(1+Math.floor(Math.random()*6))],
+ [/(nombre (aleatoire|au hasard)|choisis un nombre|un chiffre au hasard)/,c=>'Mon tirage : '+(1+Math.floor(Math.random()*100))+' (entre 1 et 100).'],
+ [/(sens de la vie)/,c=>'42. Enfin, c\'est ce que dit Douglas Adams.'],
+ [/(meteo|il fait quel temps|il pleut|il fait chaud|il fait froid)/,c=>'Je n\'ai pas d\'accès à la météo ici. Un coup d\'œil par la fenêtre sera plus fiable que moi !'],
+ [/(je (m ennuie|m emmerde)|je sais pas quoi faire|ennuye)/,c=>c.v('Ennui = bon moment pour tester : une blague, une anecdote, pile ou face, ou rangeons le bureau ensemble ?','Ennui détecté. Options : blague, anecdote, ou ouvrir btop et regarder les courbes.')],
+ [/(je suis|j suis|je me sens) (vraiment |trop |tres |un peu )?(triste|deprime|mal|nul|decourage|stresse|angoisse|epuise|fatigue|crevé|creve)/,c=>{
+   if(/(deprime|mal\b|angoisse|epuise)/.test(c.t))return 'Désolé que ça ne va pas. Je ne suis qu\'un petit programme, mais je t\'écoute. Si c\'est lourd, parles-en à quelqu\'un de proche. En France, le 3114 répond à toute heure en cas de détresse.';
+   return hPick(['Courage, ça arrive à tout le monde. Une pause, un verre d\'eau, et ça ira mieux. Je suis là si tu veux discuter.','Je comprends. Va y doucement : une petite pause te fera du bien.'])}],
+ [/(je suis|j suis|je me sens) (vraiment |trop |tres )?(content|heureux|heureuse|contente|fier|fiere|en forme|motive|motivee)/,c=>'Ça fait plaisir à entendre ! Profites-en.'],
+ [/(bravo|genial|super|excellent|t es fort|tu es fort|bien joue|trop bien|j adore|c est cool)/,c=>hPick(['Merci, c\'est gentil !','Content que ça te plaise !','Ça fait plaisir. On continue ?'])],
+ [/\b(nul|idiot|stupide|bete|inutile|con|debile)\b/,c=>hPick(['Aïe. Je fais de mon mieux : dis-moi ce qui ne va pas et je réessaie.','D\'accord, je ne suis pas parfait. Reformule ta demande et je ferai mieux.'])],
+ [/(je t aime|tu me plais)/,c=>'C\'est gentil, mais je suis juste un programme. Content de t\'aider, en tout cas !'],
+ [/(aide moi|j ai besoin d aide|tu peux m aider|au secours|help me)/,c=>c.v('Bien sûr. Dis-moi ce que tu cherches : ouvrir une app, un raccourci, une commande Linux ?','Dis-moi le problème : perf, réseau, stockage, commande ?')],
+ [/^(oui|ouais|yep|non|nope|ok|okay|d accord|dac|cool|bien|top|parfait|nickel|ah|hmm|mdr|lol|haha|ptdr)[ !.?]*$/,c=>c.hist.length?hPick(['D\'accord.','Ok, on continue ?','Compris.','Je t\'écoute.']):null],
+ [/\b(mdr|lol|haha|ptdr)\b/,c=>hPick(['😄','Haha !','Content de t\'avoir fait sourire.'])],
+ [/(parle moi de toi|presente toi|que sais tu faire)/,null]
+];
+function humanTalk(q,who,hist){
+  const t=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/['’`]/g,' ').replace(/\s+/g,' ').trim();
+  if(!t||t.length>140)return null;
+  const c={q,t,who,hist:hist||[],name:hName(),v:(n,o)=>who==='nova'?n:o};
+  const calc=hCalc(t);if(calc!==null)return t+' → '+calc;
+  for(const [re,ans] of HUMAN){
+    if(!ans||!re.test(t))continue;
+    const r=typeof ans==='function'?ans(c):Array.isArray(ans)?hPick(ans):ans;
+    if(r)return r;
+  }
+  return null;
+}
+function orbitThink(q,hist){
+  const t=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const has=(...ks)=>ks.some(k=>t.includes(k));
+  const cores=navigator.hardwareConcurrency||'?';
+  const on=navigator.onLine?'oui':'non';
+  const mem=(navigator.deviceMemory!=null)?navigator.deviceMemory+' Go (approx)':'n/d';
+  const up=Math.floor(performance.now()/1000);
+  const plat=navigator.platform||'?';
+  const lang=navigator.language||'?';
+  const _h=humanTalk(q,'orbit',hist);if(_h)return _h;
+
+  if(has('diagnostic','diag','check system','verifie','vérifie'))
+    return {text:'Diagnostic Orbit : btop + terminal.',act:'plan:btop,term'};
+  if(has('session perf','mode perf','performance'))
+    return {text:'Session perf : Lumen + btop + terminal.',act:'plan:lumen,btop,term'};
+  if(has('ouvre btop','moniteur','lance btop'))
+    return {text:'btop.',act:'btop'};
+  if(has('ouvre terminal','shell'))
+    return {text:'Terminal sys.',act:'term'};
+  if(has('ouvre lumen','mode lumen'))
+    return {text:'Lumen.',act:'lumen'};
+  if(has('statut','status','etat','état','sante','santé','infos systeme','infos système','system info'))
+    return 'Orbit — snapshot navigateur\n• threads CPU : '+cores+'\n• deviceMemory : '+mem+'\n• online : '+on+'\n• plateforme : '+plat+'\n• langue : '+lang+'\n• uptime page : '+up+'s\n• userAgent : '+(navigator.userAgent||'').slice(0,80)+'…';
+  if(has('qui es','presentation','présent'))
+    return 'Orbit : agent pixel système.\nBase : perf, réseau, navigateur, diagnostic, Linux sysadmin léger.\nNova = UI/bureau (base différente).';
+  if(has('aide','help','que peux'))
+    return 'Orbit : diagnostic, session perf, statut, btop, notions CPU/RAM/réseau/sécurité navigateur.\nCommandes utiles : « statut », « diagnostic », « ouvre btop ».';
+  if(has('nova'))
+    return 'Nova gère le bureau. Moi (Orbit) le sys.\nClic avatar cyan ou commande `orbit`.';
+  if(has('bonjour','salut','hello'))
+    return 'Orbit online. Statut, diagnostic, btop — à toi.';
+
+  // Perf / hardware concepts
+  if(has('cpu','processeur','thread','coeur','cœur','core '))
+    return 'CPU : exécute les instructions.\nThreads logiques navigateur : '+cores+'.\nPlus de cœurs ≠ toujours plus vite (Amdahl).\nbtop ici simule une charge.';
+  if(has('ram','memoire','mémoire','memory'))
+    return 'RAM = mémoire vive volatile.\ndeviceMemory ≈ '+mem+'.\nManque de RAM → swap/thrashing, onglets tués (navigateur).';
+  if(has('gpu','carte graphique','webgl'))
+    return 'GPU : parallèle (graphismes, ML léger, WebGL/WebGPU).\narchweb utilise surtout CSS/JS CPU ; pas de gros rendu 3D ici.';
+  if(has('batterie','battery'))
+    return 'Batterie : API Battery parfois dispo, souvent limitée.\nLa barre Lumen affiche un BAT simulé décoratif.';
+  if(has('stockage','disque','ssd','hdd','indexeddb','localstorage'))
+    return 'Stockage navigateur : localStorage (petit), IndexedDB (plus large), Cache API.\nPas d\'accès disque hôte réel depuis une page web classique.';
+
+  // Réseau
+  if(has('reseau','réseau','network','latence','ping','bandwidth','bande passante'))
+    return 'Réseau : latence (ms) vs débit (Mb/s).\nOnline actuellement : '+on+'.\nHTTP/2-3, DNS, TLS influencent la snappiness perçue.';
+  if(has('dns','domaine'))
+    return 'DNS : nom → adresse IP.\nProblème DNS = site injoignable malgré le réseau.\nOutils hors navigateur : dig, nslookup, DoH.';
+  if(has('firewall','pare-feu'))
+    return 'Pare-feu : filtre trafic entrant/sortant.\nSur poste : ufw/firewalld/nftables.\nNavigateur : same-origin + permissions.';
+  if(has('vpn'))
+    return 'VPN : tunnel chiffré vers un réseau distant.\nUtile privacy/réseau d\'entreprise ; attention au fournisseur et à la latence.';
+
+  // Sécurité
+  if(has('securite','sécurité','xss','csrf','cve'))
+    return 'Sécu web : XSS, CSRF, injection, deps vulnérables (CVE).\nBonnes pratiques : CSP, escape HTML (comme esc() ici), HTTPS, least privilege.';
+  if(has('https','tls','ssl','certificat'))
+    return 'TLS chiffre HTTP → HTTPS.\nCertificats validés par le navigateur.\nÉvite le mixed content (HTTP dans page HTTPS).';
+  if(has('mot de passe','password','2fa','mfa','passkey'))
+    return 'Mots de passe uniques + gestionnaire.\n2FA/MFA fortement recommandé.\nPasskeys (WebAuthn) = phish-resistant.';
+
+  // Process / OS concepts
+  if(has('processus','pid','kill','nice'))
+    return 'Processus = programme en cours (PID).\nkill/SIGTERM puis SIGKILL.\nnice : priorité CPU.\nbtop/htop listent CPU/MEM par process.';
+  if(has('load average','charge systeme','charge système'))
+    return 'Load average : file d\'attente CPU (1/5/15 min).\nSur 4 cœurs, load 4 ≈ saturation.\nIci btop est une simulation pédagogique.';
+  if(has('swap'))
+    return 'Swap : extension RAM sur disque, plus lente.\nUtile anti-OOM ; trop de swap = système traînant.';
+  if(has('container','docker','podman','kubernetes','k8s'))
+    return 'Conteneurs isolent process/filesystem (Docker/Podman).\nK8s orchestre à grande échelle.\nPas de conteneurs dans archweb — purement front.';
+
+  // Observabilité
+  if(has('log','journalctl','observabilite','observabilité','metrique','métrique'))
+    return 'Logs + métriques + traces = observabilité.\nLinux : journalctl, dmesg.\nWeb : console, performance API (uptime page '+up+'s).';
+  if(has('uptime'))
+    return 'Uptime page (performance.now) : '+up+'s.\nUptime machine réelle non exposé aux pages web pour des raisons de fingerprinting.';
+
+  // Navigateur
+  if(has('chrome','firefox','safari','navigateur','browser'))
+    return 'Navigateurs = moteur (Blink/Gecko/WebKit) + UI.\nPlateforme détectée : '+plat+'.\nLes agents tournent entièrement client-side.';
+  if(has('service worker','pwa','cache'))
+    return 'Service worker : proxy scriptable, offline, push.\nsw.js peut accompagner une PWA.\nUtile pour cache d\'assets archweb.';
+  if(has('fingerprint','tracking','vie privee','vie privée','privacy'))
+    return 'Fingerprinting : canvas, fonts, hardwareConcurrency ('+cores+')…\nRéduire le tracking : conteneurs d\'onglets, anti-fingerprinting, peu d\'extensions douteuses.';
+
+  if(has('encore','plus','detail','détail') && hist.length>=1)
+    return 'Sur le sys : précise CPU, RAM, réseau, sécu, docker, statut…';
+  if(t.length<3)
+    return 'Orbit : statut | diagnostic | btop | cpu | ram | réseau…';
+  return 'Orbit — pas d\'entrée pour « '+q.slice(0,60)+' ».\nBase sys : statut, diagnostic, cpu, ram, réseau, sécu, docker, navigateur.';
+}
+
+
+
+function mkAI(bd,w){
+  setTitle(w,'Forge');bd.className='bd app';
+  bd.style.cssText='padding:0;display:flex;flex-direction:column;min-height:0;height:100%';
+  const hist=[];
+  bd.innerHTML=`<div class="ai-wrap forge">
+    <div class="ai-head"><i class="dot"></i><div><b>Forge</b><span> · atelier bureau · local</span></div><div class="ai-meta" id="aimeta">prêt</div></div>
+    <div class="ai-log" id="ailog"></div>
+    <div class="ai-sug" id="aisug"></div>
+    <div class="ai-foot"><textarea id="aiin" rows="1" placeholder="Parle à Nova… Entrée pour envoyer, Shift+Entrée pour une ligne"></textarea><button id="aisend">Envoyer</button></div>
+  </div>`;
+  const log=bd.querySelector('#ailog'), inp=bd.querySelector('#aiin'), send=bd.querySelector('#aisend'), sug=bd.querySelector('#aisug'), meta=bd.querySelector('#aimeta');
+  const fmt=t=>esc(t).replace(/\n/g,'<br>').replace(/`([^`]+)`/g,'<code>$1</code>');
+  const add=(role,text,cls='')=>{
+    const d=document.createElement('div');d.className='ai-msg '+role+(cls?' '+cls:'');
+    if(role==='bot')d.innerHTML='<span class="tag">forge</span><div class="body">'+fmt(text)+'</div>';
+    else d.textContent=text;
+    log.append(d);log.scrollTop=log.scrollHeight;return d;
+  };
+  const typewrite=async(el,text)=>{
+    const body=el.querySelector('.body')||el;
+    let out='';
+    // chunks plus naturels (mots)
+    const parts=text.split(/(\s+)/);
+    for(const part of parts){
+      out+=part;
+      body.innerHTML=fmt(out);
+      log.scrollTop=log.scrollHeight;
+      await new Promise(r=>setTimeout(r, part.trim()?14+Math.random()*18:4));
+    }
+  };
+  const runAction=act=>{
+    if(!act)return;
+    if(String(act).startsWith('plan:')){
+      const steps=act.slice(5).split(',');
+      novaBusy(true);novaSay('Plan · '+steps.length+' étapes…',2000);
+      steps.forEach((step,i)=>setTimeout(()=>runAction(step.trim()),i*420));
+      setTimeout(()=>{novaBusy(false);novaSay('Plan terminé ✓')},steps.length*420+400);
+      toast('Agent · '+steps.length+' étapes');
+      return;
+    }
+    if(act==='lumen'){setMode('win');toast('Mode Lumen');}
+    else if(act==='arch'){setMode('tile');toast('Mode Arch');}
+    else if(act==='term')spawn('term');
+    else if(act==='wiki')spawn('wiki');
+    else if(act==='btop')spawn('btop');
+    else if(act==='files'){setMode('win');spawn('files');}
+    else if(act==='store'){setMode('win');spawn('store');}
+    else if(act==='set'){setMode('win');spawn('set');}
+    else if(act==='sound')snd(!SND);
+    else if(act==='ai')spawn('ai');
+  };
+  const reply=async(q)=>{
+    send.disabled=true;inp.disabled=true;meta.textContent='réfléchit…';
+    const thinking=add('bot','…','think');
+    await new Promise(r=>setTimeout(r,220+Math.random()*380));
+    const res=novaThink(q,hist);
+    const a=typeof res==='string'?res:res.text;
+    const act=typeof res==='object'?res.act:null;
+    hist.push({q,a});
+    if(hist.length>30)hist.shift();
+    thinking.remove();
+    const el=add('bot','');
+    await typewrite(el,a);
+    if(act){
+      const bar=document.createElement('div');bar.className='ai-actions';
+      const labels={lumen:'Ouvrir Lumen',arch:'Mode Arch',term:'Terminal',wiki:'Wiki',btop:'Moniteur',files:'Fichiers',store:'Pacstore',set:'Réglages',sound:'Son on/off'};
+      const b=document.createElement('button');b.type='button';b.textContent=labels[act]||act;
+      b.onclick=()=>runAction(act);
+      bar.append(b);el.append(bar);
+      // auto-run soft actions
+      if(['lumen','arch'].includes(act)) setTimeout(()=>runAction(act),400);
+    }
+    meta.textContent='en ligne · '+hist.length+' échg.';
+    send.disabled=false;inp.disabled=false;inp.focus();
+  };
+  const go=()=>{
+    const q=inp.value.trim();if(!q||send.disabled)return;
+    inp.value='';inp.style.height='44px';
+    add('user',q);reply(q);
+  };
+  send.onclick=go;
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go()}});
+  inp.addEventListener('input',()=>{inp.style.height='44px';inp.style.height=Math.min(140,inp.scrollHeight)+'px'});
+  const tips=['Qui es-tu ?','Prépare le bureau','Ouvre Lumen','Raccourcis clavier','Ouvre terminal et wiki','Statut agent'];
+  sug.innerHTML=tips.map(t=>`<button type="button">${t}</button>`).join('');
+  sug.onclick=e=>{const b=e.target.closest('button');if(!b)return;inp.value=b.textContent;go()};
+  add('bot','Forge online — atelier bureau.\nBase : Lumen, apps, Linux/dev/web.\nScope (vert) a la base système.\nEx. « prépare le bureau », « git », « arch linux ».');
+  setTimeout(()=>inp.focus(),200);
+}
+
+function novaThink(q,hist){
+  const t=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const has=(...ks)=>ks.some(k=>t.includes(k));
+  const _h=humanTalk(q,'nova',hist);if(_h)return _h;
+  // plans / actions
+  if(has('prepare le bureau','prépare le bureau','setup bureau','installe le bureau','agent bureau'))
+    return {text:'Plan Nova : Lumen → terminal. Exécution.',act:'plan:lumen,term'};
+  if(has('ouvre terminal et wiki','terminal et wiki','term et wiki'))
+    return {text:'Plan : terminal + wiki.',act:'plan:term,wiki'};
+  if(has('session travail','mode travail','workspace'))
+    return {text:'Session travail : Lumen + terminal + fichiers.',act:'plan:lumen,term,files'};
+  if(has('ouvre lumen','passe en lumen','mode lumen','active lumen','bascule lumen'))
+    return {text:'Passage en mode Lumen.',act:'lumen'};
+  if(has('ouvre arch','passe en arch','mode arch','tiling','mode tile'))
+    return {text:'Retour tiling Arch.',act:'arch'};
+  if(has('ouvre terminal','lance terminal','ouvre le terminal','nouveau terminal'))
+    return {text:'Ouverture terminal.',act:'term'};
+  if(has('ouvre wiki','lance wiki','archwiki'))
+    return {text:'Ouverture wiki.',act:'wiki'};
+  if(has('ouvre btop','moniteur','cpu'))
+    return {text:'Ouverture btop.',act:'btop'};
+  if(has('ouvre fichier','explorateur','dossier'))
+    return {text:'Ouverture Fichiers (Lumen).',act:'files'};
+  if(has('ouvre reglages','réglages','settings','parametres','paramètres'))
+    return {text:'Ouverture Réglages.',act:'set'};
+  if(has('coupe le son','mute','active le son','son on','son off'))
+    return {text:'Bascule son UI.',act:'sound'};
+  if(has('que fais tu','statut agent','status agent','ton statut'))
+    return 'Nova — agent bureau archweb.\nBase : UI, Lumen, raccourcis, apps, culture web/OS.\nOrbit gère le sys/perf (cyan).';
+
+  // identité
+  if(has('qui es','qui es-tu','t\'es qui','tu es qui','presentation','presente','présente'))
+    return 'Nova : agent pixel du bureau Lumen.\nJe pilote l\'interface, les apps et les raccourcis.\nBase de connaissances distincte d\'Orbit (lui = système).';
+  if(has('bonjour','salut','hello','hey','coucou'))
+    return 'Salut. Nova à l\'écoute — bureau, Lumen, apps, culture tech.';
+  if(has('merci','thanks','cool','super','parfait','top'))
+    return 'OK. Autre chose sur le bureau ou le web ?';
+  if(has('synapse','obsidian','graphe','note'))
+    return 'Synapse retiré. Nova + Orbit les remplacent.\nAlt+S = Nova · agent Orbit à gauche en Lumen.';
+
+  // OS archweb / Lumen
+  if(has('lumen','bureau','dock','fenetre','fenêtre','void mesh','void-mesh'))
+    return 'Lumen = bureau Void Mesh.\n• Alt+M / bouton Lumen / `lumen`\n• Dock, Alt+Espace lanceur\n• Fenêtres carbone + bord néon\n• Agents pixel : Nova (droite) Orbit (gauche)\nDis « ouvre Lumen » pour basculer.';
+  if(has('terminal','shell','bash','commande'))
+    return 'Terminal : term / Alt+Entrée / « ouvre terminal ».\nCommandes : neofetch, pacman, wiki, btop, ai, orbit, lumen, arch, help.\nAlt+Shift+Q ferme la fenêtre.';
+  if(has('pacman','paquet','install'))
+    return 'Pacman simulé :\n• `pacman -Syu` maj\n• `pacman -S fortune-mod` install\n• `pacman -Q` liste\nPacstore en Lumen = même idée en UI.';
+  if(has('clavier','raccourci','hotkey','aide','help'))
+    return 'Raccourcis :\nAlt+Entrée terminal · Alt+Shift+Q fermer\nAlt+1..4 bureaux · Alt+J/K focus\nAlt+W wiki · Alt+B btop · Alt+S Forge\nAlt+M Arch⇄Lumen · Alt+Espace lanceur';
+  if(has('wiki','doc','documentation'))
+    return 'Wiki local : Alt+W ou « ouvre wiki ».\nCouvre raccourcis, tiling, Lumen.';
+  if(has('theme','couleur','accent','fond','wallpaper'))
+    return 'Réglages : accent, fonds (vice/nuit/black/aurora/dusk/forest/graphite), son, bascule mode.\nDis « ouvre réglages ».';
+  if(has('que peux','que sais','capacite','capacité','fonctionnal'))
+    return 'Nova : expliquer UI, ouvrir apps, plans multi-étapes, culture web/Linux/dev.\nOrbit : perf, diagnostic, statut machine navigateur.';
+
+  // Linux / Arch culture
+  if(has('linux','gnu','kernel'))
+    return 'Linux = noyau ; GNU/Linux = système complet.\nArch = rolling release, pacman, wiki très riche.\nici archweb simule l\'esprit Arch dans le navigateur.';
+  if(has('arch linux','archlinux','rolling'))
+    return 'Arch Linux : KISS, rolling, pacman, AUR.\nInstallation manuelle, doc exemplaire (Arch Wiki).\narchweb reprend le thème tiling + terminal.';
+  if(has('tiling','i3','sway','hyprland','bspwm'))
+    return 'WM tiling : fenêtres en mosaïque sans chevauchement.\ni3/Sway/Hyprland/bspwm sont populaires.\nMode Arch ici = tiling simple multi-bureaux.';
+  if(has('systemd','init system'))
+    return 'systemd = init dominant sur Linux (services, logs journalctl).\nAlternatives : OpenRC, runit (souvent sur non-systemd).';
+  if(has('wayland','x11','xorg'))
+    return 'X11 = historique ; Wayland = protocole moderne (Sway, Hyprland, GNOME/KDE Wayland).\nMoins de round-trips, sécurité d\'entrée améliorée.';
+
+  // Web / dev
+  if(has('html','css','javascript','js ','frontend','front-end'))
+    return 'archweb = HTML/CSS/JS vanilla, sans framework.\nUI Lumen en CSS (Void Mesh).\nPour modifier : édite index.html, recharge.';
+  if(has('git','github','commit','branch'))
+    return 'Git : commit / branch / merge.\nGitHub Pages peut héberger archweb (fichiers statiques).\n`git status` · `git add` · `git commit` · `git push`.';
+  if(has('http','https','api','rest','json'))
+    return 'HTTP/HTTPS : requêtes client-serveur.\nAPI REST souvent JSON.\nNova/Orbit ici sont 100% locaux — pas d\'appel API externe.';
+  if(has('markdown','md '))
+    return 'Markdown : titres #, listes -, code `backticks`, liens [txt](url).\nTrès utilisé pour README et notes.';
+  if(has('regex','expression reguliere','expression régulière'))
+    return 'Regex : motifs pour chercher/valider du texte.\nEx. `^[a-z]+$` = lettres minuscules seulement.\nAttention à la lisibilité et aux cas limites.';
+  if(has('accessibilite','accessibilité','a11y'))
+    return 'A11y : contraste, focus clavier, labels, sémantique HTML, alt sur images.\nLes agents pixel ici ont des title ; le chat clavier Entrée pour envoyer.';
+
+  // Productivité / soft skills tech
+  if(has('productivite','productivité','focus','deep work'))
+    return 'Astuces : une tâche à la fois, blocs de temps, couper notifications.\nIci : session travail = Lumen + terminal + fichiers.';
+  if(has('open source','foss','licence mit','gpl'))
+    return 'Open source : code lisible/modifiable, licences (MIT, Apache, GPL…).\nGPL = copyleft ; MIT = permissive.';
+
+  // Fun / culture
+  if(has('neofetch','fastfetch'))
+    return 'neofetch affiche un résumé système en ASCII.\nIci : tape `neofetch` dans le terminal archweb.';
+  if(has('vim','neovim','emacs'))
+    return 'Vim/Neovim : modal, très efficace une fois appris.\nEmacs : environnement extensible (Lisp).\nDébat historique — les deux excellent.';
+  if(has('rust','golang','go lang','python','typescript'))
+    return 'Langages courants : Python (script/data), TS/JS (web), Go (services), Rust (sûreté mémoire).\nChoisis selon perf, écosystème, contrainte mémoire.';
+
+  if(has('heure','date','temps'))
+    return 'Horloge dans la barre Lumen.\nNavigateur : '+new Date().toLocaleString('fr-FR')+'.';
+  if(has('orbit'))
+    return 'Orbit (cyan, gauche) = agent système/perf.\nNova (rouge, droite) = bureau & culture UI/dev.\nDeux bases séparées.';
+
+  if(hist.length>=2 && has('encore','plus','detail','détail','explique mieux'))
+    return 'Développe le sujet (Lumen, Linux, git, raccourcis…).\nOu ouvre le wiki : « ouvre wiki ».';
+  if(t.length<3)
+    return 'Précise : lumen, git, linux, raccourcis, ouvre…';
+  return 'Nova — pas de fiche exacte pour « '+q.slice(0,70)+' ».\nEssais : lumen, linux, git, pacman, raccourcis, « que peux-tu faire ? », ouvre terminal.';
+}
+
+
+function mkSet(bd,w){
+  setTitle(w,'Réglages');bd.className='bd app';
+  bd.innerHTML=`<div class="st"><h2>Réglages</h2><h3>Couleur d'accent</h3><div class="sw">${Object.entries(ACC).map(([k,v])=>`<i data-a="${k}" style="background:${v}"></i>`).join('')}</div>
+  <h3>Fond d'écran</h3><div class="sw">${Object.keys(WPS).map(k=>`<i data-w="${k}" style="background:${WPS[k]}"></i>`).join('')}</div>
+  <h3>Son</h3><button data-s>Activer / couper les sons</button>
+  <h3>Environnement</h3><button data-m>Passer en tiling Arch</button>
+  <h3>À propos</h3><p>${MARK} <b>Lumen</b> · bureau d'archweb<br><span class="d">Shell web écrit à la main, sans framework.</span></p></div>`;
+  bd.onclick=e=>{
+    const a=e.target.closest('[data-a]'),p=e.target.closest('[data-w]');
+    if(a)document.documentElement.style.setProperty('--ac',ACC[a.dataset.a]);
+    if(p)setWp(p.dataset.w);
+    if(e.target.closest('[data-m]'))setMode('tile');
+    if(e.target.closest('[data-s]'))snd(!SND);
+  };
+}
+
+/* ---------- fenêtres tilées ---------- */
+const WS=[[],[],[],[]];let cur=0,focus=null,uid=0,mode='tile',Z=1;const ALL=()=>WS.flat();
+
+function tile(){
+  if(mode==='win')return tileWin();
+  const area=$('#area'),ws=WS[cur],n=ws.length,W=area.clientWidth,H=area.clientHeight,g=6;
+  document.querySelectorAll('.win').forEach(e=>e.style.display='none');
+  ws.forEach((w,i)=>{
+    let x=0,y=0,ww=W,hh=H;
+    if(W<700){hh=(H-g*(n-1))/n;y=i*(hh+g)}
+    else if(n>1){
+      if(i===0){ww=Math.floor(W*.55)-g/2}
+      else{const m=n-1;hh=(H-g*(m-1))/m;x=Math.floor(W*.55)+g/2;y=(i-1)*(hh+g);ww=W-x}
+    }
+    Object.assign(w.el.style,{display:'flex',left:x+'px',top:y+'px',width:ww+'px',height:hh+'px'});
+    w.el.classList.toggle('f',w===focus);
+  });
+  $('#wss').innerHTML=WS.map((l,i)=>`<span class="w${i===cur?' on':''}${l.length?' has':''}" data-ws="${i}">${i+1}</span>`).join('');
+  $('#ttl').textContent=focus?focus.title:'archweb';
+  if(focus&&focus.term)focus.term.inp.focus();
+}
+function tileWin(){
+  const area=$('#area'),W=area.clientWidth,H=area.clientHeight,all=ALL();
+  document.querySelectorAll('.win:not(.closing):not(.minimizing)').forEach(e=>e.style.display='none');
+  all.forEach((w,i)=>{
+    if(!w.init){
+      const k=i%6;
+      Object.assign(w.el.style,{left:Math.max(0,Math.min(90+k*28,W-220))+'px',top:20+k*28+'px',width:Math.min((w.type==='ai'||w.type==='orbit')?720:520,W-12)+'px',height:Math.min((w.type==='ai'||w.type==='orbit')?520:340,H-40)+'px'});
+      w.init=true;w.max=false;
+    }
+    w.el.style.display=w.min?'none':'flex';
+    if(w._rs&&!w.min){w._rs=0;w.el.classList.add('restoring');setTimeout(()=>w.el.classList.remove('restoring'),380)}
+    w.el.style.zIndex=w.z||1;
+    w.el.classList.toggle('f',w===focus&&!w.min);
+  });
+  $('#wss').innerHTML='<span class="w start" data-start>'+MARK+'<b>Lumen</b></span>';
+  $('#ttl').textContent=focus&&!focus.min?focus.title:'Bureau';
+  dock();
+  if(focus&&focus.term&&!focus.min)focus.term.inp.focus();
+}
+function setTitle(w,t){w.title=t;w.el.querySelector('.tt').textContent=t;if(mode==='win')tile();else if(w===focus)$('#ttl').textContent=t}
+function closeWin(w){
+  for(const l of WS){const i=l.indexOf(w);if(i>-1)l.splice(i,1)}
+  // Synapse reste en daemon : on détache l'iframe, on ne la détruit pas
+  w.stop&&w.stop();
+  sfx('close');focus=(mode==='win'?ALL().filter(x=>!x.min).at(-1):WS[cur][0])||null;
+  if(mode==='win'&&w.el.style.display!=='none'){w.el.classList.add('closing');setTimeout(()=>w.el.remove(),230)}else w.el.remove();
+  tile();dock();
+}
+function switchWs(n){cur=n;focus=WS[n][0]||null;tile()}
+function moveTo(n){
+  if(!focus||n===cur)return;
+  WS[cur].splice(WS[cur].indexOf(focus),1);WS[n].push(focus);
+  focus=WS[cur][0]||null;tile();
+}
+function cycle(d){
+  const ws=mode==='win'?ALL().filter(x=>!x.min):WS[cur];if(!ws.length)return;
+  focus=ws[(ws.indexOf(focus)+d+ws.length)%ws.length];focus.z=++Z;tile();
+}
+
+function spawn(type){
+  // Nova IA : une seule instance
+  if(type==='ai'||type==='orbit'){
+    const existing=ALL().find(x=>x.type===type);
+    if(existing){
+      if(existing.min){existing.min=false;existing._rs=1}
+      focus=existing;existing.z=++Z;tile();dock();sfx('open');return existing;
+    }
+  }
+  const w={id:++uid,type,el:document.createElement('div'),title:type};
+  w.el.className='win';
+  w.el.innerHTML='<div class="tb"><span class="tt"></span><span><b class="m">–</b><b class="mx">+</b><b class="x">×</b></span></div><div class="bd"></div>';
+  const bd=w.el.querySelector('.bd');
+  $('#area').appendChild(w.el);WS[cur].push(w);focus=w;w.z=++Z;w.el.classList.add('opening');
+  w.el.addEventListener('animationend',e=>{if(e.target===w.el)w.el.classList.remove('opening')});
+  w.el.addEventListener('mousedown',()=>{if(focus!==w||w.z!==Z){focus=w;w.z=++Z;tile()}});
+  w.el.querySelector('.x').onclick=()=>closeWin(w);
+  w.el.querySelector('.m').onclick=()=>minimize(w);
+  w.el.querySelector('.mx').onclick=()=>toggleMax(w);
+  if(type==='term'){w.term=mkTerm(bd,w)}
+  else if(type==='wiki'){bd.className='bd wiki';bd.innerHTML=WIKI;setTitle(w,'archwiki')}
+  else if(type==='btop'){mkBtop(bd,w)}
+  else if(type==='files')mkFiles(bd,w);
+  else if(type==='store')mkStore(bd,w);
+  else if(type==='set')mkSet(bd,w);
+  else if(type==='ai')mkAI(bd,w);
+  else if(type==='orbit')mkOrbit(bd,w);
+  tile();sfx('open');return w;
+}
+
+/* ---------- btop factice ---------- */
+function mkBtop(bd,w){
+  setTitle(w,'btop');
+  const cores=[20,35,10,50],bar=(v,n=24)=>{v=Math.max(0,Math.min(100,v));const k=Math.round(v/100*n);return '<span class="g">'+'█'.repeat(k)+'</span><span class="d">'+'░'.repeat(n-k)+'</span>'};
+  const procs=['systemd','archweb-tile','archweb-term','pacman','dbus-daemon','NetworkManager','bash'];
+  const draw=()=>{
+    for(let i=0;i<cores.length;i++)cores[i]+=Math.random()*24-12,cores[i]=Math.max(2,Math.min(98,cores[i]));
+    const mem=38+Math.random()*6;
+    bd.innerHTML='<span class="a">btop</span> <span class="d">— '+esc(navigator.hardwareConcurrency||4)+' threads reported by your browser</span>\n\n'
+     +cores.map((c,i)=>`CPU${i} ${bar(c)} ${String(Math.round(c)).padStart(3)}%`).join('\n')
+     +`\n\nMem  ${bar(mem)} ${mem.toFixed(0)}%\nUp   ${Math.floor((Date.now()-T0)/1000)}s\n\n<span class="y">PID    COMMAND          CPU%</span>\n`
+     +procs.map((p,i)=>`${String(100+i*37).padEnd(7)}${p.padEnd(17)}${(Math.random()*(8-i)).toFixed(1)}`).join('\n')
+     +'\n\n<span class="d">(simulation, q = fermer la fenêtre avec Alt+Shift+Q)</span>';
+  };
+  draw();const id=setInterval(draw,900);w.stop=()=>clearInterval(id);
+}
+
+/* ---------- terminal ---------- */
+const C={};
+function mkTerm(bd,w){
+  const t={cwd:['home','user'],hist:[],hi:0,busy:false,w};
+  const out=document.createElement('div'),row=document.createElement('div');
+  row.className='ln';
+  const pr=document.createElement('span'),inp=document.createElement('input');
+  inp.spellcheck=false;inp.autocapitalize='off';inp.autocomplete='off';
+  row.append(pr,inp);bd.append(out,row);t.inp=inp;
+  const dir=()=>{const j=t.cwd.join('/');return j==='home/user'?'~':j.startsWith('home/user/')?'~/'+j.slice(10):'/'+j};
+  const prompt=()=>`<span class="g">[user</span><span class="d">@</span><span class="a">archweb</span> ${esc(dir())}<span class="g">]</span>$&nbsp;`;
+  t.p=(s='',c='')=>{const d=document.createElement('div');d.innerHTML=c?`<span class="${c}">${esc(s)}</span>`:esc(s);out.append(d);bd.scrollTop=bd.scrollHeight};
+  t.h=h=>{const d=document.createElement('div');d.innerHTML=h;out.append(d);bd.scrollTop=bd.scrollHeight};
+  t.clear=()=>{out.innerHTML=''};
+  t.dir=dir;
+  const refresh=()=>{pr.innerHTML=prompt();setTitle(w,'user@archweb: '+dir())};
+  t.refresh=refresh;refresh();
+  bd.addEventListener('click',()=>{if(!getSelection().toString())inp.focus()});
+  inp.addEventListener('keydown',async e=>{
+    if(e.altKey)return;
+    if(e.key.length===1&&!e.ctrlKey&&!e.metaKey)sfx('key');
+    if(e.key==='Enter'){
+      if(t.busy)return;
+      const line=inp.value;inp.value='';
+      t.h(prompt()+esc(line));
+      if(line.trim()){t.hist.push(line);t.hi=t.hist.length;t.busy=true;
+        try{await run(t,line)}catch(err){sfx('err');t.p('bash: '+err.message,'r')}
+        t.busy=false}
+      refresh();inp.focus();
+    }else if(e.key==='ArrowUp'){e.preventDefault();if(t.hi>0)inp.value=t.hist[--t.hi]}
+    else if(e.key==='ArrowDown'){e.preventDefault();inp.value=t.hi<t.hist.length-1?t.hist[++t.hi]:(t.hi=t.hist.length,'')}
+    else if(e.key==='l'&&e.ctrlKey){e.preventDefault();t.clear()}
+    else if(e.key==='Tab'){
+      e.preventDefault();
+      const parts=inp.value.split(/\s+/),last=parts.pop(),first=parts.length===0;
+      const pool=first?[...Object.keys(C)]:Object.keys(get(t.cwd)||{});
+      const m=pool.filter(x=>x.startsWith(last));
+      if(m.length===1){inp.value=[...parts,m[0]].join(' ')+(first?' ':'')}
+      else if(m.length>1)t.p(m.join('  '),'d');
+    }
+  });
+  return t;
+}
+
+async function run(t,line){
+  const toks=[...line.matchAll(/"([^"]*)"|'([^']*)'|(\S+)/g)].map(m=>m[1]??m[2]??m[3]);
+  let root=false;
+  if(toks[0]==='sudo'){toks.shift();root=true}
+  const cmd=toks.shift();if(!cmd)return;
+  const fn=C[cmd];
+  if(fn){try{await fn(toks,t,root)}finally{persist()}return}
+  if(BIN[cmd]&&inst.has(BIN[cmd])){t.p(cmd+': ce programme est simulé dans le navigateur.','d');return}
+  sfx('err');t.p(`bash: ${cmd}: command not found`);
+}
+
+
+/* ---------- commandes ajoutées ---------- */
+const rd=(f,t)=>{const n=get(norm(f,t.cwd));return typeof n==='string'?n:null};
+const cpR=n=>typeof n==='object'?Object.fromEntries(Object.entries(n).map(([k,v])=>[k,cpR(v)])):n;
+const dst=(src,to,t)=>{let p=norm(to,t.cwd),d=get(p);if(d&&typeof d==='object')p=[...p,src.split('/').filter(Boolean).pop()];return p};
+Object.assign(C,{
+  cp(a,t){const A=a.filter(x=>!x.startsWith('-'));if(A.length<2)return t.p('cp: missing file operand','r');
+    const n=get(norm(A[0],t.cwd));if(n===undefined)return t.p(`cp: cannot stat '${A[0]}'`,'r');
+    if(typeof n==='object'&&!a.some(x=>/^-.*[rR]/.test(x)))return t.p(`cp: -r not specified; omitting directory '${A[0]}'`,'r');
+    const p=dst(A[0],A[1],t),d=get(p.slice(0,-1));if(!d||typeof d!=='object')return t.p('cp: no such directory','r');d[p.at(-1)]=cpR(n)},
+  mv(a,t){const A=a.filter(x=>!x.startsWith('-'));if(A.length<2)return t.p('mv: missing file operand','r');
+    const sp=norm(A[0],t.cwd),sd=get(sp.slice(0,-1)),n=get(sp);if(n===undefined)return t.p(`mv: cannot stat '${A[0]}'`,'r');
+    const p=dst(A[0],A[1],t),d=get(p.slice(0,-1));if(!d||typeof d!=='object')return t.p('mv: no such directory','r');
+    if(p.join('/').startsWith(sp.join('/')+'/'))return t.p('mv: cannot move a directory into itself','r');
+    d[p.at(-1)]=n;if(sd!==d||sp.at(-1)!==p.at(-1))delete sd[sp.at(-1)]},
+  head(a,t){const ni=a.indexOf('-n'),n=ni>=0?+a[ni+1]||10:10,f=a.filter((x,i)=>!x.startsWith('-')&&a[i-1]!=='-n')[0],s=f&&rd(f,t);
+    if(s===null||s===undefined)return t.p(`head: cannot open '${f||''}'`,'r');t.p(s.split('\n').slice(0,n).join('\n'))},
+  tail(a,t){const ni=a.indexOf('-n'),n=ni>=0?+a[ni+1]||10:10,f=a.filter((x,i)=>!x.startsWith('-')&&a[i-1]!=='-n')[0],s=f&&rd(f,t);
+    if(s===null||s===undefined)return t.p(`tail: cannot open '${f||''}'`,'r');t.p(s.replace(/\n$/,'').split('\n').slice(-n).join('\n'))},
+  wc(a,t){for(const f of a.filter(x=>!x.startsWith('-'))){const s=rd(f,t);if(s===null)t.p(`wc: ${f}: No such file`,'r');else t.p(`${(s.match(/\n/g)||[]).length} ${s.trim()?s.trim().split(/\s+/).length:0} ${s.length} ${f}`)}},
+  grep(a,t){const fl=a.filter(x=>x.startsWith('-')).join(''),A=a.filter(x=>!x.startsWith('-'));
+    if(!A.length)return t.p('usage: grep [-i] [-n] pattern file...','r');
+    let re;try{re=new RegExp(A[0],fl.includes('i')?'i':'')}catch(e){return t.p('grep: invalid regex','r')}
+    for(const f of A.slice(1)){const s=rd(f,t);if(s===null){t.p(`grep: ${f}: No such file`,'r');continue}
+      s.split('\n').forEach((l,i)=>{if(re.test(l))t.p((A.length>2?f+':':'')+(fl.includes('n')?(i+1)+':':'')+l)})}},
+  tree(a,t){const root=get(a[0]?norm(a[0],t.cwd):t.cwd);if(!root||typeof root!=='object')return t.p('tree: not a directory','r');
+    let d=0,f=0;const w=(n,pre)=>{const ks=Object.keys(n).sort();ks.forEach((k,i)=>{const last=i===ks.length-1,isD=typeof n[k]==='object';
+      t.p(pre+(last?'└── ':'├── ')+k,isD?'a':'');isD?d++:f++;if(isD)w(n[k],pre+(last?'    ':'│   '))})};
+    t.p(a[0]||'.');w(root,'');t.p(`\n${d} directories, ${f} files`)},
+  history(a,t){t.hist.forEach((l,i)=>t.p(String(i+1).padStart(4)+'  '+l))},
+  which(a,t){for(const c of a)t.p(C[c]?'/usr/bin/'+c:c+' not found',C[c]?'':'r')},
+  env(a,t){t.p('USER=user\nHOME=/home/user\nSHELL=/bin/bash\nEDITOR=vim\nHOSTNAME=archweb\nPWD=/'+t.cwd.join('/'))},
+  resetfs(a,t){try{localStorage.removeItem(FSK)}catch(e){}for(const k in fs)delete fs[k];Object.assign(fs,JSON.parse(FS0));t.cwd=['home','user'];t.p('système de fichiers réinitialisé','d')}
+});
+/* ---------- commandes ---------- */
+const ASCII_COW=(s)=>{const l='_'.repeat(s.length+2),b='-'.repeat(s.length+2);
+  return ` ${l}\n< ${s} >\n ${b}\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||`};
+Object.assign(C,{
+  help(a,t){t.h(`<span class="a">Commandes :</span> help ls cd pwd cat echo mkdir touch rm cp mv head tail wc grep tree history which env resetfs clear whoami hostname uname date uptime
+neofetch pacman wiki btop theme sound ai nova orbit lumen arch exit
+<span class="a">Après pacman -S :</span> cowsay sl fortune htop btop vim git
+<span class="a">Clavier :</span> Alt+Entrée nouveau terminal · Alt+Shift+Q fermer · Alt+1..4 bureau · Alt+Shift+1..4 déplacer · Alt+J/K focus · Alt+W wiki · Alt+B btop · Alt+S Forge IA · Alt+M Arch⇄Lumen · Alt+Espace lanceur`)},
+  clear(a,t){t.clear()},
+  whoami(a,t){t.p('user')},
+  hostname(a,t){t.p('archweb')},
+  pwd(a,t){t.p('/'+t.cwd.join('/'))},
+  date(a,t){t.p(new Date().toString())},
+  uptime(a,t){const m=Math.floor((Date.now()-T0)/60000);t.p(` up ${m} min, 1 user, load average: 0.00, 0.01, 0.00`)},
+  uname(a,t){t.p(a.includes('-a')?'Linux archweb 6.12.0-arch1-1 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux':'Linux')},
+  echo(a,t){
+    const i=a.findIndex(x=>x==='>'||x==='>>'),ap=i>=0&&a[i]==='>>';
+    if(i<0){t.p(a.join(' '));return}
+    if(!a[i+1])return t.p('bash: syntax error near unexpected token `newline\'','r');
+    const f=norm(a[i+1],t.cwd),d=get(f.slice(0,-1)),k=f.at(-1),txt=a.slice(0,i).join(' ')+'\n';
+    if(d&&typeof d==='object'&&typeof d[k]!=='object'){d[k]=(ap&&typeof d[k]==='string'?d[k]:'')+txt}else t.p('bash: '+a[i+1]+': Is a directory or no such directory','r');
+  },
+  ls(a,t){
+    const all=a.some(x=>/^-.*a/.test(x)),p=a.find(x=>!x.startsWith('-')),n=get(p?norm(p,t.cwd):t.cwd);
+    if(n===undefined)return t.p(`ls: cannot access '${p}': No such file or directory`,'r');
+    if(typeof n==='string')return t.p(p);
+    const names=Object.keys(n).filter(k=>all||!k.startsWith('.')).sort();
+    t.h(names.map(k=>typeof n[k]==='object'?`<span class="a">${esc(k)}/</span>`:esc(k)).join('  ')||'');
+  },
+  cd(a,t){
+    const p=norm(a[0]||'~',t.cwd),n=get(p);
+    if(n===undefined)t.p(`bash: cd: ${a[0]}: No such file or directory`,'r');
+    else if(typeof n==='string')t.p(`bash: cd: ${a[0]}: Not a directory`,'r');
+    else t.cwd=p;
+  },
+  cat(a,t){
+    if(!a.length)return;
+    for(const f of a){const n=get(norm(f,t.cwd));
+      if(n===undefined)t.p(`cat: ${f}: No such file or directory`,'r');
+      else if(typeof n==='object')t.p(`cat: ${f}: Is a directory`,'r');
+      else t.p(n)}
+  },
+  mkdir(a,t){for(const f of a){const p=norm(f,t.cwd),d=get(p.slice(0,-1));
+    if(d&&typeof d==='object'&&!(p.at(-1) in d))d[p.at(-1)]={};else t.p(`mkdir: cannot create directory '${f}'`,'r')}},
+  touch(a,t){for(const f of a){const p=norm(f,t.cwd),d=get(p.slice(0,-1));if(d&&typeof d==='object'&&!(p.at(-1) in d))d[p.at(-1)]=''}},
+  rm(a,t){
+    if(a.includes('/')||a.includes('/*'))return t.p("rm: it is dangerous to operate recursively on '/'",'r');
+    for(const f of a.filter(x=>!x.startsWith('-'))){const p=norm(f,t.cwd),d=get(p.slice(0,-1));
+      if(d&&typeof d==='object'&&p.at(-1) in d)delete d[p.at(-1)];else t.p(`rm: cannot remove '${f}': No such file or directory`,'r')}
+  },
+  exit(a,t){closeWin(t.w)},
+  wiki(){spawn('wiki')},
+  lumen(){setMode('win')},
+  ai(){spawn('ai')},nova(){spawn('ai')},orbit(){spawn('orbit')},
+  sound(a,t){const v=a[0]==='off'?false:a[0]==='on'?true:!SND;snd(v);t.p('son : '+(v?'activé':'coupé'))},
+  arch(){setMode('tile')},
+  btop(){if(inst.has('btop'))spawn('btop');else throw new Error('btop: command not found')},
+  htop(){if(inst.has('htop'))spawn('btop');else throw new Error('htop: command not found')},
+  theme(a,t){
+    const m={gta:'#ff3d9a',orange:'#ff8a3d',cyan:'#35e0d0',blue:'#1793d1',green:'#98c379',red:'#e06c75',yellow:'#e5c07b',purple:'#c678dd'};
+    if(!m[a[0]])return t.p('usage: theme gta|orange|cyan|blue|green|red|yellow|purple');
+    document.documentElement.style.setProperty('--ac',m[a[0]]);
+  },
+  neofetch(a,t){
+    const up=Math.max(1,Math.floor((Date.now()-T0)/60000)),
+    info=[`<span class="a">user</span>@<span class="a">archweb</span>`,'-----------',
+      'OS: Arch Linux x86_64 (btw)','Host: GitHub Pages','Kernel: 6.12.0-arch1-1',`Uptime: ${up} min`,
+      `Packages: ${inst.size} (pacman)`,'Shell: bash 5.2','WM: archweb-tile','Terminal: archweb-term',
+      `CPU: ${navigator.hardwareConcurrency||'?'} threads`,`Resolution: ${innerWidth}x${innerHeight}`];
+    t.h(LOGO.map((l,i)=>`<span class="a">${esc(l.padEnd(38))}</span>${i<info.length?info[i].replace(/^(\w+):/,'<span class="a">$1</span>:'):''}`).join('\n'));
+  },
+  fortune(a,t){if(!inst.has('fortune-mod'))throw new Error('fortune: command not found');t.p(FORT[Math.floor(Math.random()*FORT.length)])},
+  cowsay(a,t){if(!inst.has('cowsay'))throw new Error('cowsay: command not found');t.p(ASCII_COW(a.join(' ')||'I use Arch btw'))},
+  sl(a,t){if(!inst.has('sl'))throw new Error('sl: command not found');t.p('      ====        ________                ___________\n  _D _|  |_______/        \\__I_I_____===__|_________|\n   |(_)---  |   H\\________/ |   |        =|___ ___|\n   /     |  |   H  |  |     |   |         ||_| |_||\n  |      |  |   H  |__--------------------| [___] |\n  | ________|___H__/__|_____/[][]~\\_______|       |\n  |/ |   |-----------I_____I [][] []  D   |=======|__','y')},
+  async pacman(a,t,root){
+    const f=a[0]||'',pk=a.slice(1);
+    const need=()=>{if(!root){t.p('error: you cannot perform this operation unless you are root.','r');return true}};
+    if(/^-Q/.test(f)){t.p([...inst].sort().map(x=>x+' 1.0-1').join('\n'));return}
+    if(/^-Ss/.test(f)){for(const k in REPO)if(!pk[0]||k.includes(pk[0]))t.h(`<span class="a">extra/</span><b>${k}</b>${inst.has(k)?' <span class="g">[installed]</span>':''}\n    ${REPO[k]}`);return}
+    if(/^-Sy/.test(f)&&!pk.length){
+      if(need())return;
+      t.p(':: Synchronizing package databases...');
+      for(const r of ['core','extra']){await sleep(300);t.p(` ${r}  is up to date`)}
+      await sleep(300);t.p(':: Starting full system upgrade...');await sleep(300);t.p(' there is nothing to do');return;
+    }
+    if(/^-S/.test(f)&&pk.length){
+      if(need())return;
+      for(const k of pk){
+        if(!(k in REPO)){t.p(`error: target not found: ${k}`,'r');return}
+        if(inst.has(k)){t.p(`warning: ${k} is up to date -- reinstalling`,'y')}
+        t.p('resolving dependencies...\nlooking for conflicting packages...\n\nPackages (1) '+k+'\n\n:: Proceed with installation? [Y/n] y');
+        const d=document.createElement('div');t.h('');
+        for(let i=0;i<=10;i++){await sleep(110);d.textContent=`(1/1) installing ${k}  [${'#'.repeat(i*2).padEnd(20,'-')}] ${i*10}%`;
+          if(i===0)t.h('<span id="pgs"></span>');$('#pgs').textContent=d.textContent}
+        $('#pgs').removeAttribute('id');inst.add(k);sfx('ok');$('#pk').textContent=inst.size+' pkgs';
+      }
+      return;
+    }
+    if(/^-R/.test(f)&&pk.length){
+      if(need())return;
+      for(const k of pk){if(inst.delete(k))t.p(`removing ${k}...`);else t.p(`error: target not found: ${k}`,'r')}
+      $('#pk').textContent=inst.size+' pkgs';return;
+    }
+    t.p('usage: pacman -S <pkg> | -Syu | -Ss <q> | -Q | -R <pkg>   (avec sudo)');
+  }
+});
+
+/* ---------- wiki ---------- */
+const WIKI=`<h2>archwiki</h2>
+<p>Un « OS » qui tourne dans ton navigateur. Rien à installer, tout est simulé en JavaScript. Hébergé sur GitHub Pages.</p>
+<h3>Raccourcis (Mod = Alt)</h3>
+<ul>
+<li><kbd>Alt+Entrée</kbd> nouveau terminal</li>
+<li><kbd>Alt+Shift+Q</kbd> fermer la fenêtre active</li>
+<li><kbd>Alt+1</kbd>…<kbd>4</kbd> changer de bureau</li>
+<li><kbd>Alt+Shift+1</kbd>…<kbd>4</kbd> envoyer la fenêtre sur un bureau</li>
+<li><kbd>Alt+J</kbd> / <kbd>Alt+K</kbd> fenêtre suivante / précédente</li>
+<li><kbd>Alt+W</kbd> wiki · <kbd>Alt+B</kbd> btop · <kbd>Alt+S</kbd> Forge (atelier)</li>
+<li><kbd>Alt+M</kbd> bascule Arch (tiling) ⇄ <b>Lumen</b> (bureau avec dock, lanceur, Fichiers, Pacstore, Réglages). Commandes : <code>lumen</code> / <code>arch</code></li>
+<li><kbd>Alt+Espace</kbd> lanceur d'applications (mode Lumen)</li>
+</ul>
+<h3>Terminal</h3>
+<ul>
+<li><code>help</code> liste les commandes</li>
+<li><code>sudo pacman -Syu</code> met à jour le système</li>
+<li><code>sudo pacman -S cowsay</code> installe un paquet</li>
+<li><code>pacman -Ss</code> cherche, <code>pacman -Q</code> liste</li>
+<li><code>theme green</code> change la couleur d'accent</li>
+<li><code>neofetch</code>, évidemment</li>
+</ul>
+<h3>Sur mobile</h3>
+<p>Utilise les boutons <code>term</code> et <code>wiki</code> dans la barre du haut. Les fenêtres s'empilent verticalement.</p>`;
+
+
+/* Nova Agent character */
+const NOVA_LINES=['forge:~$ ready','./prepare-desk','void-mesh: ok','atelier online','alt+s → chat','ouvrir apps?'];
+function novaSay(msg,ms=3400){
+  const b=$('#novaBubble'),p=$('#novaPet');if(!b||!p)return;
+  b.textContent=msg;p.classList.add('show');
+  clearTimeout(novaSay._t);novaSay._t=setTimeout(()=>p.classList.remove('show'),ms);
+}
+function novaBusy(on){const p=$('#novaPet');if(p)p.classList.toggle('busy',!!on)}
+(function initNovaPet(){
+  const p=$('#novaPet');if(!p)return;
+  let drag=false,ox=0,oy=0,moved=false;
+  p.addEventListener('pointerdown',e=>{
+    if(e.button!=null&&e.button!==0)return;
+    drag=true;moved=false;p.setPointerCapture(e.pointerId);
+    const r=p.getBoundingClientRect(),desk=$('#desk').getBoundingClientRect();
+    ox=e.clientX-r.left;oy=e.clientY-r.top;
+  });
+  p.addEventListener('pointermove',e=>{
+    if(!drag)return;moved=true;
+    const desk=$('#desk').getBoundingClientRect();
+    let x=e.clientX-desk.left-ox,y=e.clientY-desk.top-oy;
+    x=Math.max(8,Math.min(desk.width-96,x));
+    y=Math.max(40,Math.min(desk.height-110,y));
+    p.style.left=x+'px';p.style.top=y+'px';p.style.right='auto';p.style.bottom='auto';
+  });
+  p.addEventListener('pointerup',e=>{
+    if(!drag)return;drag=false;
+    try{p.releasePointerCapture(e.pointerId)}catch(err){}
+    if(!moved){
+      if(mode!=='win'){setMode('win');novaSay('Lumen activé ✨')}
+      spawn('ai');novaSay('atelier prêt');
+    }
+  });
+  setInterval(()=>{
+    if(mode!=='win'||document.hidden)return;
+    const _p=$('#novaPet');if(_p&&_p.classList.contains('show'))return;
+    if(Math.random()>.72)novaSay(NOVA_LINES[Math.floor(Math.random()*NOVA_LINES.length)],2600);
+  },14000);
+})();
+
+
+const ORBIT_LINES=['scope:~$ idle','threads: ok','./diagnostic','btop ready','scan…','sys nominal'];
+function orbitSay(msg,ms=3400){
+  const b=$('#orbitBubble'),p=$('#orbitPet');if(!b||!p)return;
+  b.textContent=msg;p.classList.add('show');
+  clearTimeout(orbitSay._t);orbitSay._t=setTimeout(()=>p.classList.remove('show'),ms);
+}
+function orbitBusy(on){const p=$('#orbitPet');if(p)p.classList.toggle('busy',!!on)}
+(function initOrbitPet(){
+  const p=$('#orbitPet');if(!p)return;
+  let drag=false,ox=0,oy=0,moved=false;
+  p.addEventListener('pointerdown',e=>{
+    if(e.button!=null&&e.button!==0)return;
+    drag=true;moved=false;p.setPointerCapture(e.pointerId);
+    const r=p.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;
+  });
+  p.addEventListener('pointermove',e=>{
+    if(!drag)return;moved=true;
+    const desk=$('#desk').getBoundingClientRect();
+    let x=e.clientX-desk.left-ox,y=e.clientY-desk.top-oy;
+    x=Math.max(8,Math.min(desk.width-96,x));
+    y=Math.max(40,Math.min(desk.height-110,y));
+    p.style.left=x+'px';p.style.top=y+'px';p.style.right='auto';p.style.bottom='auto';
+  });
+  p.addEventListener('pointerup',e=>{
+    if(!drag)return;drag=false;
+    try{p.releasePointerCapture(e.pointerId)}catch(err){}
+    if(!moved){
+      if(mode!=='win'){setMode('win');orbitSay('Lumen · sys')}
+      spawn('orbit');orbitSay('scope prêt');
+    }
+  });
+  setInterval(()=>{
+    if(mode!=='win'||document.hidden)return;
+    const _p=$('#orbitPet');if(_p&&_p.classList.contains('show'))return;
+    if(Math.random()>.78)orbitSay(ORBIT_LINES[Math.floor(Math.random()*ORBIT_LINES.length)],2400);
+  },16000);
+})();
+
+/* ---------- boot ---------- */
+let skip=false;
+addEventListener('keydown',()=>skip=true);$('#boot').addEventListener('click',()=>skip=true);
+const shotSkip=new URLSearchParams(location.search).get('shot');
+if(shotSkip)skip=true;
+(async()=>{
+  const B=$('#boot');
+  const L=['GRUB loading Arch Linux...','Loading Linux linux ...','Loading initial ramdisk ...','',
+    ...['Mounted /boot.','Reached target Local File Systems.','Started Network Manager.','Started D-Bus System Message Bus.','Reached target Multi-User System.','Started archweb tiling manager.']
+      .map(s=>'[<span class="ok">  OK  </span>] '+s),'','Arch Linux 6.12.0-arch1-1 (tty1)','','archweb login: user (autologin)'];
+  for(const l of L){B.innerHTML+=l+'\n';if(skip)break;await sleep(l?170:60)}
+  await sleep(skip?0:400);
+  B.remove();$('#desk').hidden=false;$('#pk').textContent=inst.size+' pkgs';
+  Q=true;const t1=spawn('term');spawn('wiki');focus=WS[0][0];tile();
+  t1.term.inp.value='neofetch';t1.term.inp.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}));Q=false;sfx('boot');
+  const tickClk=()=>{const c=$('#clk');if(c)c.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})};tickClk();setInterval(tickClk,1000);
+  if(shotSkip){
+    setTimeout(()=>{
+      const m=shotSkip;
+      if(m==='lumen'||m==='nova'||m==='orbit'||m==='agents')setMode('win');
+      if(m==='nova'||m==='agents')spawn('ai');
+      if(m==='orbit'||m==='agents')spawn('orbit');
+    },200);
+  }
+
+  setTimeout(()=>t1.term.h('\n<span class="y">→ Forge : bouton « forge », pixel en Lumen, ou</span> <span class="a">forge</span>\n<span class="y">→ Bureau Lumen : bouton « Lumen » · dock · Alt+S</span>'),80);
+})();
+
+/* ---------- entrées globales ---------- */
+addEventListener('keydown',e=>{
+  if(!e.altKey)return;
+  const c=e.code;let h=true;
+  if(c==='Enter')spawn('term');
+  else if(c==='KeyQ'&&e.shiftKey){focus&&closeWin(focus)}
+  else if(/^Digit[1-4]$/.test(c)){const n=+c[5]-1;e.shiftKey?moveTo(n):switchWs(n)}
+  else if(c==='KeyJ')cycle(1);
+  else if(c==='KeyK')cycle(-1);
+  else if(c==='KeyW')spawn('wiki');
+  else if(c==='KeyB')spawn('btop');
+  else if(c==='KeyS')spawn('ai');
+  else if(c==='KeyM')setMode(mode==='win'?'tile':'win');
+  else h=false;
+  if(h)e.preventDefault();
+});
+$('#bar').addEventListener('click',e=>{
+  const s=e.target.closest('[data-sp]'),w=e.target.closest('[data-ws]');
+  if(s)spawn(s.dataset.sp);else if(w)switchWs(+w.dataset.ws);
+});
+function setMode(m){
+  sfx('lc');mode=m;document.body.classList.toggle('winmode',m==='win');
+  ALL().forEach(w=>{w.init=false;w.min=false});
+  closeLC();$('#mode').textContent=m==='win'?'Arch':'Lumen';
+  if(!ALL().includes(focus)||(m==='tile'&&!WS[cur].includes(focus)))focus=(m==='win'?ALL().at(-1):WS[cur][0])||null;
+  tile();
+}
+function minimize(w){
+  sfx('min');
+  const fin=()=>{w.el.classList.remove('minimizing');w.min=true;focus=ALL().filter(x=>!x.min).at(-1)||null;tile()};
+  const d=$(`#tk [data-win="${w.id}"]`)||$(`#tk [data-app="${w.type}"]`);
+  if(mode!=='win'||!d)return fin();
+  const r=w.el.getBoundingClientRect(),q=d.getBoundingClientRect(),st=w.el.style;
+  st.setProperty('--tx',(q.left+q.width/2-r.left-r.width/2)+'px');
+  st.setProperty('--ty',(q.top+q.height/2-r.top-r.height/2)+'px');
+  w.el.classList.add('minimizing');setTimeout(fin,320);
+}
+function toggleMax(w){
+  sfx('max');
+  w.el.classList.add('tr');setTimeout(()=>w.el.classList.remove('tr'),380);
+  const s=w.el.style,a=$('#area');
+  if(!w.max){w.prev=[s.left,s.top,s.width,s.height];Object.assign(s,{left:'0px',top:'0px',width:a.clientWidth+'px',height:a.clientHeight+'px'});w.max=true}
+  else{[s.left,s.top,s.width,s.height]=w.prev;w.max=false}
+}
+$('#area').addEventListener('pointerdown',e=>{
+  if(mode!=='win')return;
+  const tb=e.target.closest('.tb');if(!tb||e.target.closest('b'))return;
+  const el=tb.parentElement,w=ALL().find(x=>x.el===el);if(!w||w.max)return;
+  const sx=e.clientX-el.offsetLeft,sy=e.clientY-el.offsetTop;document.body.classList.add('dragging');
+  const mv=ev=>{el.style.left=Math.max(0,ev.clientX-sx)+'px';el.style.top=Math.max(0,ev.clientY-sy)+'px'};
+  const up=()=>{document.body.classList.remove('dragging');removeEventListener('pointermove',mv);removeEventListener('pointerup',up)};
+  addEventListener('pointermove',mv);addEventListener('pointerup',up);
+});
+const bounce=k=>requestAnimationFrame(()=>{const d=$(`#tk [data-app="${k}"]`);if(d){d.classList.add('bounce');setTimeout(()=>d.classList.remove('bounce'),900)}});
+const openApp=k=>{
+  const w=ALL().filter(x=>x.type===k).at(-1);
+  if(!w){spawn(k);bounce(k);return}
+  if(w.min){w.min=false;w._rs=1;focus=w;sfx('restore')}
+  else if(focus===w){minimize(w);return}
+  else focus=w;
+  w.z=++Z;tile();
+};
+let tkSD=[];
+const closeLC=()=>$('#lc').classList.remove('open');
+function fillLC(q){$('#lcg').innerHTML=Object.keys(APPS).filter(k=>APPS[k].n.toLowerCase().includes(q.toLowerCase())).map((k,i)=>`<div class="ap" style="animation-delay:${i*40}ms" data-app="${k}">${ico(k,60)}${APPS[k].n}</div>`).join('')}
+function openLC(){sfx('lc');const l=$('#lc'),i=l.querySelector('input');l.classList.add('open');i.value='';fillLC('');i.focus()}
+$('#lc input').addEventListener('input',e=>fillLC(e.target.value));
+$('#lc input').addEventListener('keydown',e=>{if(e.key==='Enter'){const a=$('#lcg .ap');if(a){closeLC();openApp(a.dataset.app)}}});
+addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeLC();
+  if(mode==='win'&&e.altKey&&e.code==='Space'){e.preventDefault();openLC()}
+});
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('#tk .tq,#tk .tt2,#tk button,#tk .tkstart,#tk #tksd,.ap,.di,#bar .b,#bar .w'))sfx('click');
+  if(t.closest('#mode,#tkmode')){setMode(mode==='win'?'tile':'win');return}
+  if(t.closest('[data-start],[data-lc]')){$('#lc').classList.contains('open')?closeLC():openLC();return}
+  const tw=t.closest('#tk [data-win]');
+  if(tw){closeLC();const w=ALL().find(x=>x.id==tw.dataset.win);if(w){
+    if(w.min){w.min=false;w._rs=1;focus=w;w.z=++Z;sfx('restore');tile()}
+    else if(focus===w){minimize(w)}
+    else{focus=w;w.z=++Z;tile()}}return}
+  if(t.closest('#tksd')){closeLC();const vis=ALL().filter(x=>!x.min);
+    if(vis.length){tkSD=vis;vis.forEach(w=>w.min=true);focus=null;sfx('min')}
+    else if(tkSD.length){tkSD.filter(w=>ALL().includes(w)).forEach(w=>{w.min=false;w._rs=1});focus=tkSD.at(-1);sfx('restore');tkSD=[]}
+    tile();return}
+  const a=t.closest('#dock [data-app],#tk [data-app],#lc [data-app],#dsk [data-app]');
+  if(a){closeLC();openApp(a.dataset.app);return}
+  if(t.id==='lc')closeLC();
+});
+$('#dock').addEventListener('mousemove',e=>{document.querySelectorAll('#dock .dk').forEach(d=>{const q=d.getBoundingClientRect(),k=1+.6*Math.max(0,1-Math.abs(e.clientX-(q.left+q.width/2))/120)**2;d.style.transform=`translateY(${-(k-1)*20}px) scale(${k})`})});
+$('#dock').addEventListener('mouseleave',()=>document.querySelectorAll('#dock .dk').forEach(d=>d.style.transform=''));
+$('#dsk').innerHTML=`<div class="di" data-app="ai">${ico('ai',60)}Forge</div><div class="di" data-app="orbit" style="margin-top:8px">${ico('orbit',60)}Scope</div>`;
+addEventListener('blur',()=>setTimeout(()=>{const a=document.activeElement;if(a&&a.tagName==='IFRAME'){const w=ALL().find(x=>x.el.contains(a));if(w&&(focus!==w||w.z!==Z)){focus=w;w.z=++Z;tile()}}}));
+if(navigator.getBattery)navigator.getBattery().then(b=>{const f=()=>$('#bat').textContent='BAT '+Math.round(b.level*100)+'%';f();b.onlevelchange=f}).catch(()=>{});
+addEventListener('resize',tile);
+const clk=()=>{$('#clk').textContent=new Date().toLocaleString('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
+clk();setInterval(clk,15000);
+const tkTick=()=>{const d=new Date(),c=$('#tkclk');if(!c)return;c.querySelector('b').textContent=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});c.querySelector('small').textContent=d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});const b=$('#bat');$('#tkbat').textContent=b?b.textContent:''};
+tkTick();setInterval(tkTick,5000);
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
